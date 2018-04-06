@@ -21,7 +21,6 @@ library(xts)
 library(geojsonio)
 
 library(tidyr)
-library(streamgraph)
 library(plotly)
 library(dygraphs)
 

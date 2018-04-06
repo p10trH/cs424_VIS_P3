@@ -1,0 +1,12 @@
+name: tornadoes
+title: tornadoes
+username:
+account: piot
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 317188
+bundleId: 1306924
+url: https://piot.shinyapps.io/tornadoes/
+when: 1523058193.00511
+asMultiple: FALSE
+asStatic: FALSE
