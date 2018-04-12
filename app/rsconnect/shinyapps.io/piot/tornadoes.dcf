@@ -5,8 +5,8 @@ account: piot
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 317188
-bundleId: 1306924
+bundleId: 1316391
 url: https://piot.shinyapps.io/tornadoes/
-when: 1523058193.00511
+when: 1523573382.36098
 asMultiple: FALSE
 asStatic: FALSE

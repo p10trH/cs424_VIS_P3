@@ -1,3 +1,479 @@
 body {
     background-color: #888888;
 }
+
+/* ---------------------------------- */
+
+.tabbable > .nav > li {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=mainNav] > li {
+    font-size: 40px;
+    margin-left: 20px;
+}
+
+.tabbable > .nav[id=mainNav] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 5px solid #484747;
+    padding: 10px 40px;
+}
+
+.tabbable > .nav[id=mainNav] > li[class=active] > a {
+    background-color: #484747;
+    color: white;
+    border: 5px solid #484747;
+}
+
+.tabbable > .nav[id=mainNav] > li > a:hover {
+    background-color: #484747;
+}
+
+#mainNav {
+    
+    border-radius: 4px; 
+    border-bottom: 1px solid #888888;
+    margin-top: -15px;
+}
+
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=timelineNav] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 4px solid #888888;
+}
+
+.tabbable > .nav[id=timelineNav] > li[class=active] > a {
+    background-color: #888888;
+    color: white;
+    border: 4px solid #484747;
+}
+
+.tabbable > .nav[id=timelineNav] > li > a:hover {
+    background-color: #888888;
+    border: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=overviewNav] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 4px solid #888888;
+}
+
+.tabbable > .nav[id=overviewNav] > li[class=active] > a {
+    background-color: #888888;
+    color: white;
+    border: 4px solid #484747;
+}
+
+.tabbable > .nav[id=overviewNav] > li > a:hover {
+    background-color: #888888;
+    border: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=mapTabs1] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=mapTabs1] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=mapTabs1] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=mapTabs2] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=mapTabs2] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=mapTabs2] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=mapTabs3] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=mapTabs3] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=mapTabs3] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=a3Tabs] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=a3Tabs] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=a3Tabs] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+/* delete */
+.tabbable > .nav[id=a2Tabs] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=a2Tabs] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=a2Tabs] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=chartAndTable_tabs] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=chartAndTable_tabs] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=chartAndTable_tabs] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+#mapTabs1, #mapTabs2, #mapTabs3, #a3Tabs, #a2Tabs, #b2Tabs, #chartAndTable_tabs, #c2c4tabs, #c5tabs1, #c5tabs2
+                                    {border-radius: 4px; border-bottom: 0px solid #AAAAAA; margin-bottom: 10px;}
+
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=b2Tabs] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=b2Tabs] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=b2Tabs] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=c2c4tabs] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=c2c4tabs] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+
+.tabbable > .nav[id=c2c4tabs] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=c5tabs1] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=c5tabs1] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=c5tabs1] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav[id=c5tabs2] > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+    border: 0px;
+    border-bottom: 4px solid #AAAAAA;
+}
+
+.tabbable > .nav[id=c5tabs2] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: white;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+.tabbable > .nav[id=c5tabs2] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px;
+    border-bottom: 4px solid #484747;
+}
+
+/* ---------------------------------- */
+
+.tabbable > .nav > li > a {
+    color: #CFCFCF;
+    border-radius: 4px;
+}
+
+.tabbable > .nav > li[class=active] > a {
+    background-color: #484747;
+    color: white;
+}
+
+.tabbable > .nav > li > a:hover {
+    background-color: #484747;
+}
+
+/* ---------------------------------- */
+
+.nav-tabs-custom > .nav > li {
+    font-size: 26px;
+}
+
+/* ---------------------------------- */
+
+.nav-tabs-custom > .nav > li > a {
+    color: #666666;
+    border-radius: 4px;
+    margin: 0px;
+    padding: 10px;
+    margin-left: 30px;
+}
+
+.nav-tabs-custom > .nav > li[class=active] > a {
+    background-color: #DDDDDD;
+    color: #484747;
+    border: 0px;
+    margin: 1px;
+    margin-left: 31px;
+}
+
+.nav-tabs-custom > .nav > li > a:hover {
+    background-color: #DDDDDD;
+    border: 0px solid #DDDDDD;
+    margin: 1px;
+    margin-left: 31px;
+}
+
+/* ---------------------------------- */
+
+.nav-tabs-custom > .nav > li {
+    float: right;
+}
+
+.pull-right {
+    float: left !important;
+    font-size: 26px;
+}
+
+.nav-tabs-custom > .nav {
+    border-bottom: 0px;
+}
+
+/* ---------------------------------- */
+
+.nav-tabs-custom {padding: 20px; margin-bottom: 20px; background-color: #AAAAAA; color: #484747; border-radius: 4px;}
+
+/* ---------------------------------- */
+
+/* ---------------------------------- */
+
+#timelineNav {border-radius: 4px; border-bottom: 0px solid #188888; margin-top: -10px;}
+
+/* ---------------------------------- */
+
+#overviewNav {border-radius: 4px; border-bottom: 0px solid #188888;}
+
+/* ---------------------------------- */
+
+
+/* ---------------------------------- */
+
+.selectize-input {background: #DDDDDD !important; font-size:24px; width:100%;} .selectize-dropdown {font-size:24px;width:100%;}
+
+/* ---------------------------------- */
+
+.irs {margin-top: 60px;}
+.irs-grid-pol.small {height: 0px;}
+.irs-grid-pol {height: 15px; width: 5px; top: 17px; background: #666666;}
+
+/* ---------------------------------- */
+
+.irs-grid-text {font-size: 18px; color: white; z-index: 0; bottom: -20px;}
+.irs-single {font-size: 24px; color: white; background: #484747; top: 63px; z-index:1; padding-left: 5px; padding-right: 5px;}
+.irs-slider {background: #666666; width: 30px; height: 45px; top: 15px; border-radius: 4px;}
+.irs-slider:hover {background: #666666; width: 30px; height: 45px; top: 15px; border-radius: 4px;}
+.irs-bar {width: 100%; height: 25px; background: #484747; border-top: 1px solid #484747; border-bottom: 1px solid #484747;}
+.irs-bar-edge {background: #484747; border: 1px solid #484747; height: 25px; border-radius: 4px; width: 20px;}
+.irs-line {background: #CFCFCF; border: 1px solid #CFCFCF; height: 25px; border-radius: 4px;}
+
+/* ---------------------------------- */
+
+.irs-min, .irs-max {display: none;}
+.irs-to, .irs-from {font-size: 24px; color: white; background: #484747; top: -15px;}
+
+/* ---------------------------------- */
+
+.checkbox{font-size: 26px !important;}
+
+/* ---------------------------------- */
+
+#modal_Settings .modal-footer, #modal_About .modal-footer {display:none;}
+
+/* ---------------------------------- */
+
+#modal_Settings, #modal_About {font-size:25px;}
+
+/* ---------------------------------- */
+
+#action_Settings {padding: 10px 20px 10px 20px; margin-top: -47px; margin-right: 10px;}
+#action_About {padding: 10px 20px 10px 20px; margin-top: -47px; margin-right: 20px;}
+
+/* ---------------------------------- */
+
+h1 {display: inline-flex; font-size: 72px; font-weight: bold; color: #484747; padding: 55px 50px 0px 0px;}
+
+/* ---------------------------------- */
+
+h2 {font-size: 35px; font-weight: bold;  }
+
+
+/* ---------------------------------- */
+
+.hovertext text {font-size: 21px !important;}
+
+/* ---------------------------------- */
+
+
+
+/* ---------------------------------- */
+
+
+
+
+/* ---------------------------------- */
+
+
+
+
+/* ---------------------------------- */
+
+
+
+
+/* ---------------------------------- */
+
+
+
+/* ---------------------------------- */
+
+
+
+/* ---------------------------------- */
+
+
+
+
+/* ---------------------------------- */
+
+
+
+/* ---------------------------------- */
+
+
+
+/* ---------------------------------- */
