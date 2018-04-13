@@ -351,6 +351,27 @@ body {
 
 /* ---------------------------------- */
 
+.nav-tabs-custom > .nav[id=hideTabs] > li[class=active] > a {
+    background-color: #AAAAAA;
+    color: #484747;
+    border: 0px;
+    margin: 1px;
+    margin-left: 31px;
+}
+
+.nav-tabs-custom > .nav[id=hideTabs] > li > a:hover {
+    background-color: #AAAAAA;
+    border: 0px solid #AAAAAA;
+    margin: 1px;
+    margin-left: 31px;
+}
+
+/* ---------------------------------- */
+
+.nav-tabs-custom {padding: 20px; margin-bottom: 20px; background-color: #AAAAAA; color: #484747; border-radius: 4px;}
+
+/* ---------------------------------- */
+
 .nav-tabs-custom > .nav > li {
     float: right;
 }
@@ -366,7 +387,6 @@ body {
 
 /* ---------------------------------- */
 
-.nav-tabs-custom {padding: 20px; margin-bottom: 20px; background-color: #AAAAAA; color: #484747; border-radius: 4px;}
 
 /* ---------------------------------- */
 
@@ -438,9 +458,32 @@ h2 {font-size: 35px; font-weight: bold;  }
 
 /* ---------------------------------- */
 
+.dropdown-menu { 
+    left: -1000px !important;
+    top: -400px !important;
+}
 
+.open>.dropdown-menu {
+    left: -1000px !important;
+    top: -400px !important;
+}
+
+.dropdown-shinyWidgets { 
+    left: -1000px !important;
+    top: -400px !important;
+}
+
+.open>.dropdown-shinyWidgets { 
+    left: -1000px !important;
+    top: -400px !important;
+}
 
 /* ---------------------------------- */
+
+.well {
+    background-color: #888888;
+    border: 3px double #AAAAAA;
+}
 
 
 

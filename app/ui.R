@@ -10,55 +10,15 @@ dateToShow <- "6-9-1992"
 
 # states
 choices_states <- c(
-  "(AL)	Alabama",
-  "(AK)	Alaska",
-  "(AZ)	Arizona",
-  "(AR)	Arkansas",
-  "(CA)	California",
-  "(CO)	Colorado",
-  "(CT)	Connecticut",
-  "(DE)	Delaware",
-  "(FL)	Florida",
-  "(GA)	Georgia",
-  "(HI)	Hawaii",
-  "(ID)	Idaho",
-  "(IL)	Illinois",
-  "(IN)	Indiana",
-  "(IA)	Iowa",
-  "(KS)	Kansas",
-  "(KY)	Kentucky",
-  "(LA)	Louisiana",
-  "(ME)	Maine",
-  "(MD)	Maryland",
-  "(MA)	Massachusetts",
-  "(MI)	Michigan",
-  "(MN)	Minnesota",
-  "(MS)	Mississippi",
-  "(MO)	Missouri",
-  "(MT)	Montana",
-  "(NE)	Nebraska",
-  "(NV)	Nevada",
-  "(NH)	New Hampshire",
-  "(NJ)	New Jersey",
-  "(NM)	New Mexico",
-  "(NY)	New York",
-  "(NC)	North Carolina",
-  "(ND)	North Dakota",
-  "(OH)	Ohio",
-  "(OK)	Oklahoma",
-  "(OR)	Oregon",
-  "(PA)	Pennsylvania",
-  "(RI)	Rhode Island",
-  "(SC)	South Carolina",
-  "(SD)	South Dakota",
-  "(TN)	Tennessee",
-  "(TX)	Texas",
-  "(UT)	Utah",
-  "(VT)	Vermont",
-  "(VA)	Virginia",
-  "(WA)	Washington",
-  "(WV)	West Virginia",
-  "(WI)	Wisconsin",
+  "(AL)	Alabama", "(AK)	Alaska", "(AZ)	Arizona", "(AR)	Arkansas", "(CA)	California", "(CO)	Colorado",
+  "(CT)	Connecticut", "(DE)	Delaware", "(FL)	Florida", "(GA)	Georgia", "(HI)	Hawaii", "(ID)	Idaho",
+  "(IL)	Illinois", "(IN)	Indiana", "(IA)	Iowa", "(KS)	Kansas", "(KY)	Kentucky", "(LA)	Louisiana",
+  "(ME)	Maine", "(MD)	Maryland", "(MA)	Massachusetts", "(MI)	Michigan", "(MN)	Minnesota", "(MS)	Mississippi",
+  "(MO)	Missouri", "(MT)	Montana", "(NE)	Nebraska", "(NV)	Nevada", "(NH)	New Hampshire", "(NJ)	New Jersey",
+  "(NM)	New Mexico", "(NY)	New York", "(NC)	North Carolina", "(ND)	North Dakota", "(OH)	Ohio", 
+  "(OK)	Oklahoma", "(OR)	Oregon", "(PA)	Pennsylvania", "(PR) Puerto Rico", "(RI)	Rhode Island",
+  "(SC)	South Carolina", "(SD)	South Dakota", "(TN)	Tennessee", "(TX)	Texas", "(UT)	Utah", "(VT)	Vermont",
+  "(VI) Virgin Islands", "(VA)	Virginia", "(WA)	Washington", "(WV)	West Virginia", "(WI)	Wisconsin",
   "(WY)	Wyoming"
 )
 
@@ -112,18 +72,20 @@ ui <- fluidPage(
                          )
                        ),
                        column(6, offset = 0, align = 'justify',
+                              wellPanel(
                               fluidRow(
-                                tabBox(title = "", side = "left", width = 6,
+                                tabBox(id = "hideTabs", title = "Tornadoes", side = "left", width = 6,
                                        
   # -----------------------------
   # C1
-                                       tabPanel("Tornadoes", #C1
+                                       tabPanel("", #C1
                                                 tabsetPanel(id = "chartAndTable_tabs",
                                                             tabPanel("Chart", 
                                                                      fluidRow(
                                                                        column(6,
                                                                               tags$style(type = "text/css", "#c1_state1 {min-height:30vh !important;}"),
-                                                                              plotlyOutput("c1_state1")), #, height = "80vh"
+                                                                              textOutput("log"),
+                                                                              plotlyOutput("c1_state1")),
                                                                        column(6,
                                                                               tags$style(type = "text/css", "#c1_state2 {min-height:30vh !important;}"),
                                                                               plotlyOutput("c1_state2"))
@@ -146,11 +108,11 @@ ui <- fluidPage(
                                        
                                 ),
                                 
-                                tabBox(title = "", side = "left", width = 6,
+                                tabBox(id = "hideTabs", title = "Injuries, Fatalities, Loss", side = "left", width = 6,
   
   # -----------------------------
   # C5
-                                       tabPanel("Injuries, Fatalities, Loss", #C5
+                                       tabPanel("", #C5
                                            tabsetPanel(id = "chartAndTable_tabs",
                                                        tabPanel("Chart", 
                                                                 fluidRow(
@@ -345,15 +307,64 @@ ui <- fluidPage(
                                                             )
                                                 )
                                        )    
-                                ))
+                                )))
   
                        ),
-                       column(6, offset = 0, align = 'justify')
+                       column(6, offset = 0, align = 'justify',
+  # -----------------------------
+  # C9
+                              wellPanel(
+                              fluidRow(column(6, offset = 0, align = 'justify',
+                                              tags$style(type = "text/css", "#c9_state1_map {min-height:55vh !important;}"),
+                                              leafletOutput("c9_state1_map")
+                                       ),
+                                       column(6, offset = 0, align = 'justify',
+                                              tags$style(type = "text/css", "#c9_state2_map {min-height:55vh !important;}"),
+                                              leafletOutput("c9_state2_map")
+                                       )
+                              ))
+                                     
+                       )
               )
               
+  ),
+  
+  column(1, offset = 11, align = 'right',
+         dropdownButton(
+           verbatimTextOutput("logText"),
+           circle = TRUE, label = "Log", status = "default", icon = icon("list", "fa-1x"), width = "1000px",
+           tooltip = FALSE
+         )
+  ),
+  
+  
+  # -----------------------------
+  # C10, C11
+  
+  bsModal(id = "modal_Settings", h2("Settings"), trigger = "action_Settings", size = "large",
+          h2("Time"), 
+          fluidRow(column(11, offset = 1, checkboxInput("hourFormat_checkBox", label = "24h format", value = FALSE))),
+          h2("Measurement System"), 
+          fluidRow(column(11, offset = 1, radioButtons("mSystem_radio", label = NULL,
+                                                       choices = list("Metric" = 1, "Imperial" = 2), 
+                                                       selected = 2)))),
+  bsModal(id = "modal_About", h2("About"), trigger = "action_About", size = "large",
+          h2("Project 3 - CS 424", align = "center"),
+          h2("You Spin Me Round", align = "center"), br(),
+          h3("By: Peter Hanula (phanul2), Dimitar Kirilov (dkiril4), Konrad Biegaj (kbiega2)", align = "center"), br(),
+          h2("DATA INFORMATION", align = "right"),
+          h3("The data for this project comes from ...", align = "justify"),
+          h3("Direct link: ..."), br(),
+          h2("APPLICATION INFORMATION", align = "right"),
+          h3("put stuff here...", align ="justify"), br(),
+          h2("LIBRARIES USED", align = "right"),
+          
+          fluidRow(column(4, align="center", h3("shiny")),column(4, align="center", h3("lubridate")),column(4, align="center", h3("xts"))),
+          fluidRow(column(4, align="center", h3("shinyBS")),column(4, align="center", h3("ggplot2")),column(4, align="center", h3("geojsonio"))),
+          fluidRow(column(4, align="center", h3("shinythemes")),column(4, align="center", h3("reshape2")),column(4, align="center", h3("tidyr"))),
+          fluidRow(column(4, align="center", h3("shinydashboard")),column(4, align="center", h3("DT")),column(4, align="center", h3("streamgraph"))),
+          fluidRow(column(4, align="center", h3("shinyWidgets")),column(4, align="center", h3("leaflet")),column(4, align="center", h3("plotly"))),
+          fluidRow(column(4, align="center", h3("plyr")),column(4, align="center", h3("leaflet.minicharts")),column(4, align="center", h3("dygraphs"))),
+          fluidRow(column(4, align="center", h3("dplyr")),column(4, align="center", h3("zoo")),column(4, align="center", h3("")))
   )
-  
-  
-  
-
 )
