@@ -41,6 +41,9 @@ server <- function(input, output) {
   
   states <- geojsonio::geojson_read("data/states.geojson", what = "sp")
   
+  # use input$MAPID_bounds and input$MAPID_zoom
+  # set up observers and proxyleaflet
+  
   # c9 state 1 leaflet
   output$c9_state1_map <- renderLeaflet({ 
     
