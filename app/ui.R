@@ -3,7 +3,7 @@
 # -----------------------------
 
 # 1950 - 2017
-choices_years <- format(seq.Date(from = as.Date('1-1-1950', "%m-%d-%Y"), to = as.Date('12-31-2017', "%m-%d-%Y"), by="year"), "%Y")
+choices_years <- format(seq.Date(from = as.Date('1-1-1950', "%m-%d-%Y"), to = as.Date('12-31-2016', "%m-%d-%Y"), by="year"), "%Y")
 
 # month, day, year ("%m-%d-%Y")
 dateToShow <- "6-9-1992"
@@ -37,7 +37,7 @@ ui <- fluidPage(
                   sliderTextInput(inputId = "slider_years", 
                     label = NULL, width = '100%', grid = TRUE, force_edges = TRUE, hide_min_max = TRUE,
                     choices = choices_years, selected = '1992',
-                    animate=animationOptions(interval = 5000, loop = FALSE, playButton = NULL, pauseButton= NULL)
+                    animate=animationOptions(interval = 2000, loop = FALSE, playButton = NULL, pauseButton= NULL)
                   )),
       
            column(2, offset = 0, align = 'right',
@@ -314,11 +314,11 @@ ui <- fluidPage(
   # C9
                               wellPanel(
                               fluidRow(column(6, offset = 0, align = 'justify',
-                                              tags$style(type = "text/css", "#c9_state1_map {min-height:55vh !important;}"),
+                                              tags$style(type = "text/css", "#c9_state1_map {min-height:55vh !important;z-index:5 !important;}"),
                                               leafletOutput("c9_state1_map")
                                        ),
                                        column(6, offset = 0, align = 'justify',
-                                              tags$style(type = "text/css", "#c9_state2_map {min-height:55vh !important;}"),
+                                              tags$style(type = "text/css", "#c9_state2_map {min-height:55vh !important;z-index:5 !important;}"),
                                               leafletOutput("c9_state2_map")
                                        )
                               ))

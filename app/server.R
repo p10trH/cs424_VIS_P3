@@ -2,6 +2,7 @@
 # Define Server
 # -----------------------------
 
+allTornadoes <- read.csv(file = "data/all_tornadoes.csv", header = TRUE)
 
 # -----------------------------
 server <- function(input, output) {
@@ -44,18 +45,81 @@ server <- function(input, output) {
   # use input$MAPID_bounds and input$MAPID_zoom
   # set up observers and proxyleaflet
   
+  state1_map_data <- reactive({
+    mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
+    colnames(mapData)[8] <- "STUSPS"
+    states <- subset(states, STUSPS == getState1())
+    mapData <- sp::merge(states, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    #mapData <- subset(mapData, STUSPS == getState1())
+  })
+  
   # c9 state 1 leaflet
   output$c9_state1_map <- renderLeaflet({ 
     
-    m <- leaflet(states, options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
+    #m <- leaflet(states, options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
+    leaflet(options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
       setView(lng = (-87.4 + -91.6) / 2.0, lat = (36.7 + 42.6) / 2.0, zoom = 8) %>%
       #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
       setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
                        options = providerTileOptions(noWrap = TRUE))
-    
-    m %>% addPolygons(weight = 5, opacity = 1, color = "black", fillOpacity = .1)
   })
+  
+  # Incremental changes to the map should be performed in
+  # an observer. Each independent set of things that can change
+  # should be managed in its own observer.
+  observe({
+    
+    mapData = state1_map_data()
+
+    lat_start <- mapData@data$slat
+    lat_end <- mapData@data$elat
+    
+    lon_start <- mapData@data$slon
+    lon_end <- mapData@data$elon
+    
+    state <- toString(mapData@data$STUSPS[1])
+    
+    proxy <- leafletProxy("c9_state1_map", data = mapData) %>% clearShapes() %>%
+      addPolygons(weight = 3, opacity = 1, color = "black", fillOpacity = 0.0) # %>% this is redundant and draws the state multiple times
+      
+    for(i in 1:length(lat_start)){
+      
+      if (!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0)) {
+        
+          proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
+                                       lng = c(lon_start[i],lon_end[i]),
+                                weight = 20, opacity = 0.35, color = "#FF5600")
+      }
+    }
+    
+    proxy %>%
+      # start
+      addCircles(
+        lng = ~mapData@data$slon,
+        lat = ~mapData@data$slat,
+        weight = 5, fillOpacity = 0.0, radius = 2000,
+        color = "#FF5600",
+        label = paste("Start"),
+        labelOptions = labelOptions(style = list(
+          "padding" = "10px",
+          "font-size" = "35px"
+      ))) %>%
+      # end
+      addCircles(
+      lng = ~mapData@data$elon,
+      lat = ~mapData@data$elat,
+      weight = 5, fillOpacity = 0.7, radius = 3500,
+      color = "#FF5600",
+      label = paste("End"),
+      labelOptions = labelOptions(style = list(
+        "padding" = "10px",
+        "font-size" = "35px"
+      )))
+    
+  })
+  
+  #outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE)
   
   # c9 state 2 leaflet
   output$c9_state2_map <- renderLeaflet({ 
