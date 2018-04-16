@@ -3,6 +3,9 @@
 # -----------------------------
 
 allTornadoes <- read.csv(file = "data/all_tornadoes.csv", header = TRUE)
+allTornadoes$timestamp <- as.POSIXct(paste(allTornadoes$date, allTornadoes$time), format="%Y-%m-%d %H:%M:%S")
+
+allStatesLatLng <- read.csv(file = "data/all_states_lat_lng.csv", header = TRUE)
 
 # -----------------------------
 server <- function(input, output) {
@@ -136,7 +139,359 @@ server <- function(input, output) {
   
   # -----------------------------
   
+  # Dimitar----
+  textSize <- 15
   
+  plotTheme <- theme(plot.margin= unit(c(1,1,1.5,1), "cm"),
+                     plot.background = element_rect(fill = "#AAAAAA"),
+                     legend.background = element_rect(fill = "#AAAAAA"),
+                     axis.text = element_text(size = textSize),
+                     axis.title = element_text(size = textSize),
+                     legend.text = element_text(size = textSize))
+  
+  getStateLat <- function(state)
+  {
+    allStatesLatLng %>% filter(Code == state) %>% dplyr::select(Latitude) 
+  }
+  
+  getStateLng <- function(state)
+  {
+    allStatesLatLng %>% filter(Code == state) %>% dplyr::select(Longitude) 
+  }
+  
+  # Data
+  c1Data <- function(state)
+  {
+    c1 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Year = yr, Magnitude = mag) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+    
+    c1$Percent <- format(round(c1$Percent, 2), nsmall = 2)
+    c1$Percent <- paste0(c1$Percent, "%")
+    
+    
+    c1 <- dplyr::arrange(c1, Year, -Magnitude)
+    
+    c1$Magnitude <- factor(c1$Magnitude)
+    
+    return(c1)
+  }
+  
+  c2Data <- function(state)
+  {
+    c2 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Month = mo, Magnitude = mag) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+    
+    c2$Percent <- format(round(c2$Percent, 2), nsmall = 2)
+    c2$Percent <- paste0(c2$Percent, "%")
+    
+    c2 <- dplyr::arrange(c2, Month, -Magnitude)
+    
+    c2$Magnitude <- factor(c2$Magnitude)
+    
+    return(c2)
+  }
+  
+  c3Data <- function(state)
+  {
+    c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Hour = hour(timestamp), Magnitude = mag) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+    
+    c3$Percent <- format(round(c3$Percent, 2), nsmall = 2)
+    c3$Percent <- paste0(c3$Percent, "%")
+    
+    c3 <- dplyr::arrange(c3, Hour, -Magnitude)
+    
+    c3$Magnitude <- factor(c3$Magnitude)
+    
+    return(c3)
+  }
+  
+  c4Data <- function(state)
+  {
+    tornadoes <- allTornadoes
+    tornadoes <- tornadoes %>% mutate(distanceFromState = distHaversine(cbind(getStateLng(state), getStateLat(state)), cbind(slon, slat)) / 1000)
+    
+    # Metric
+    if (input$mSystem_radio == 1)
+    {
+      c4 <- tornadoes %>% filter(tornadoes$distanceFromState < input$distanceSlider) %>%
+        group_by(Year = yr, Magnitude = mag) %>%
+        summarise(Count = n()) %>%
+        mutate(Percent = (Count / sum(Count) * 100))
+    }
+    # Imperial
+    else
+    {
+      c4 <- tornadoes %>% filter((tornadoes$distanceFromState * 0.621371) < input$distanceSlider) %>%
+        group_by(Year = yr, Magnitude = mag) %>%
+        summarise(Count = n()) %>%
+        mutate(Percent = (Count / sum(Count) * 100))
+    }
+    
+    c4$Percent <- format(round(c4$Percent, 2), nsmall = 2)
+    c4$Percent <- paste0(c4$Percent, "%")
+    
+    c4 <- dplyr::arrange(c4, Year, -Magnitude)
+    
+    c4$Magnitude <- factor(c4$Magnitude)
+    
+    return(c4)
+  }
+  
+  #State 1
+  
+  output$c1_state1 <- renderPlotly({
+    
+    c1 <- c1Data(getState1())
+    
+    ggplotly(ggplot(c1, aes(x = Year, 
+                            y = Count, 
+                            group = "Magnitude", 
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c2_state1 <- renderPlotly({
+    
+    c2 <- c2Data(getState1())
+    
+    ggplotly(ggplot(c2, aes(x = Month, 
+                            y = Count, 
+                            group = "Magnitude", 
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c3_state1 <- renderPlotly({
+    
+    c3 <- c3Data(getState1())
+    
+    ggplotly(ggplot(c3, aes(x = Hour, 
+                            y = Count, 
+                            group = "Magnitude", 
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_x_continuous(breaks = round(seq(0, 23, by = 1),1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c4_state1 <- renderPlotly({
+    
+    c4 <- c4Data(getState1())
+    
+    ggplotly(ggplot(c4, aes(x = Year,
+                            y = Count,
+                            group = "Magnitude",
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) +
+               geom_bar(stat = "identity") +
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c1_state1_table <- renderDT({
+    c1 <- c1Data(getState1())
+    
+    datatable(c1, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c2_state1_table <- renderDT({
+    c2 <- c2Data(getState1())
+    
+    datatable(c2, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c3_state1_table <- renderDT({
+    c3 <- c3Data(getState1())
+    
+    datatable(c3, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c4_state1_table <- renderDT({
+    c4 <- c4Data(getState1())
+    
+    datatable(c4, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  #State 2
+  output$c1_state2 <- renderPlotly({
+    
+    c1 <- c1Data(getState2())
+    
+    ggplotly(ggplot(c1, aes(x = Year, 
+                            y = Count, 
+                            group = "Magnitude", 
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c2_state2 <- renderPlotly({
+    
+    c2 <- c2Data(getState2())
+    
+    ggplotly(ggplot(c2, aes(x = Month, 
+                            y = Count, 
+                            group = "Magnitude", 
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c3_state2 <- renderPlotly({
+    
+    c3 <- c3Data(getState2())
+    
+    ggplotly(ggplot(c3, aes(x = Hour, 
+                            y = Count, 
+                            group = "Magnitude", 
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_x_continuous(breaks = round(seq(0, 23, by = 1),1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c4_state2 <- renderPlotly({
+    
+    c4 <- c4Data(getState2())
+    
+    ggplotly(ggplot(c4, aes(x = Year,
+                            y = Count,
+                            group = "Magnitude",
+                            fill = Magnitude,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) +
+               geom_bar(stat = "identity") +
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c1_state2_table <- renderDT({
+    c1 <- c1Data(getState2())
+    
+    datatable(c1, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c2_state2_table <- renderDT({
+    c2 <- c2Data(getState2())
+    
+    datatable(c2, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c3_state2_table <- renderDT({
+    c3 <- c3Data(getState2())
+    
+    datatable(c3, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c4_state2_table <- renderDT({
+    c4 <- c4Data(getState2())
+    
+    datatable(c4, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  #------------
   
   
   

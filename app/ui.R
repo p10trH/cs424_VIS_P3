@@ -201,6 +201,7 @@ ui <- fluidPage(
                                                 tabsetPanel(id = "chartAndTable_tabs",
                                                             tabPanel("Chart", 
                                                                      fluidRow(
+                                                                       sliderInput("distanceSlider", label = h3("Distance"), min = 0, max = 600, value = 300),
                                                                        column(6,
                                                                               tags$style(type = "text/css", "#c4_state1 {min-height:30vh !important;}"),
                                                                               plotlyOutput("c4_state1")),
