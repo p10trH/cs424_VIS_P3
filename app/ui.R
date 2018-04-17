@@ -83,7 +83,6 @@ ui <- fluidPage(
                                                                      fluidRow(
                                                                        column(6,
                                                                               tags$style(type = "text/css", "#c1_state1 {min-height:30vh !important;}"),
-                                                                              textOutput("log"),
                                                                               plotlyOutput("c1_state1")),
                                                                        column(6,
                                                                               tags$style(type = "text/css", "#c1_state2 {min-height:30vh !important;}"),
@@ -219,7 +218,11 @@ ui <- fluidPage(
                                                                               DTOutput("c4_state2_table"))
                                                                      )
                                                             )
-                                                )
+                                                ),
+                                                fluidRow(
+                                                  column(1, offset = 0, h3("Distance"), align='left'),
+                                                  column(10, offset = 0, sliderInput("distanceSlider", label = NULL, min = 0, max = 600, value = 300))
+                                                  ), br()
                                        ) ,
   # -----------------------------
   # C8

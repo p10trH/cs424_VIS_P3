@@ -24,5 +24,7 @@ library(tidyr)
 library(plotly)
 library(dygraphs)
 
+library(geosphere)
+
 # -----------------------------
 
