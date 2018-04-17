@@ -159,6 +159,11 @@ server <- function(input, output) {
     allStatesLatLng %>% filter(Code == state) %>% dplyr::select(Longitude) 
   }
   
+  getMaxDistanceBetweenStates <- function(dist, state2)
+  {
+    
+  }
+  
   # Data
   c1Data <- function(state)
   {
@@ -197,10 +202,31 @@ server <- function(input, output) {
   
   c3Data <- function(state)
   {
-    c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(Hour = hour(timestamp), Magnitude = mag) %>% 
-      summarise(Count = n()) %>% 
-      mutate(Percent = (Count / sum(Count) * 100))
+    #tornadoes <- allTornadoes
+    
+    if (getHourFormat())
+    {
+      hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
+      
+      c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
+        group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Magnitude = mag) %>% 
+        summarise(Count = n()) %>% 
+        mutate(Percent = (Count / sum(Count) * 100))
+      
+      c3$Hour <- ordered(c3$Hour, levels = hours24[,])
+    }
+    else
+    {
+      hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
+      
+      c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
+        group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Magnitude = mag) %>% 
+        summarise(Count = n()) %>% 
+        mutate(Percent = (Count / sum(Count) * 100))
+      
+      c3$Hour <- ordered(c3$Hour, levels = hours12[,])
+    }
+
     
     c3$Percent <- format(round(c3$Percent, 2), nsmall = 2)
     c3$Percent <- paste0(c3$Percent, "%")
@@ -292,7 +318,6 @@ server <- function(input, output) {
                             text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
-               scale_x_continuous(breaks = round(seq(0, 23, by = 1),1)) +
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -415,7 +440,6 @@ server <- function(input, output) {
                             text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
-               scale_x_continuous(breaks = round(seq(0, 23, by = 1),1)) +
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
