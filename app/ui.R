@@ -8,17 +8,17 @@ choices_years <- format(seq.Date(from = as.Date('1-1-1950', "%m-%d-%Y"), to = as
 # month, day, year ("%m-%d-%Y")
 dateToShow <- "6-9-1992"
 
-# states
+# states, took out "(PR) Puerto Rico" and "(VI) Virgin Islands" because not in geoJSON
 choices_states <- 
-  c("(AL)	Alabama", "(AK)	Alaska", "(AZ)	Arizona", "(AR)	Arkansas", "(CA)	California", "(CO)	Colorado",
+  c("(AK)	Alaska", "(AL)	Alabama", "(AZ)	Arizona", "(AR)	Arkansas", "(CA)	California", "(CO)	Colorado",
     "(CT)	Connecticut", "(DE)	Delaware", "(FL)	Florida", "(GA)	Georgia", "(HI)	Hawaii", "(ID)	Idaho",
     "(IL)	Illinois", "(IN)	Indiana", "(IA)	Iowa", "(KS)	Kansas", "(KY)	Kentucky", "(LA)	Louisiana",
     "(ME)	Maine", "(MD)	Maryland", "(MA)	Massachusetts", "(MI)	Michigan", "(MN)	Minnesota", "(MS)	Mississippi",
     "(MO)	Missouri", "(MT)	Montana", "(NE)	Nebraska", "(NV)	Nevada", "(NH)	New Hampshire", "(NJ)	New Jersey",
     "(NM)	New Mexico", "(NY)	New York", "(NC)	North Carolina", "(ND)	North Dakota", "(OH)	Ohio", 
-    "(OK)	Oklahoma", "(OR)	Oregon", "(PA)	Pennsylvania", "(PR) Puerto Rico", "(RI)	Rhode Island",
+    "(OK)	Oklahoma", "(OR)	Oregon", "(PA)	Pennsylvania", "(RI)	Rhode Island",
     "(SC)	South Carolina", "(SD)	South Dakota", "(TN)	Tennessee", "(TX)	Texas", "(UT)	Utah", "(VT)	Vermont",
-    "(VI) Virgin Islands", "(VA)	Virginia", "(WA)	Washington", "(WV)	West Virginia", "(WI)	Wisconsin",
+    "(VA)	Virginia", "(WA)	Washington", "(WV)	West Virginia", "(WI)	Wisconsin",
     "(WY)	Wyoming")
 
 # -----------------------------
@@ -52,27 +52,29 @@ ui <- fluidPage(
   # -----------------------------
   # Main Navigation
   
+  column(10,
+  
   tabsetPanel(id = "mainNav",
               
   # -----------------------------
   # Overview
               
-              tabPanel("Overview", br()),
+              tabPanel("Overview", br(),
+                       column(3),
+                       column(9,
+                              wellPanel(
+                                fluidRow(column(12, offset = 0, align = 'justify',
+                                                tags$style(type = "text/css", "#overview_map {min-height:74vh !important;z-index:5 !important;}"),
+                                                leafletOutput("overview_map")
+                                )))
+                              )
+                       ),
               
   # -----------------------------
   # Explore Further
                        
               tabPanel("Explore Further", br(),
-                       fluidRow(
-                         column(3, offset = 6, align = 'justify',
-                                selectInput("state1_select", label = NULL, width = "100%",
-                                            choices = choices_states, selected = "(IL)	Illinois")
-                         ),
-                         column(3, offset = 0, align = 'justify',
-                                selectInput("state2_select", label = NULL, width = "100%",
-                                            choices = choices_states, selected = "(KS)	Kansas")
-                         )
-                       ),
+
                        column(4, offset = 0, align = 'justify',
                               wellPanel(
                               fluidRow(
@@ -109,235 +111,237 @@ ui <- fluidPage(
                                        
                                 )
                                 ),
+                              br(),
   
-                            fluidRow(
-                              
-                              
-                                tabBox(id = "hideTabs", title = "Injuries, Fatalities, Loss", side = "left", width = 12,
-                                       
-                                       # -----------------------------
-                                       # C5
-                                       tabPanel("", br(), #C5
-                                                tabsetPanel(id = "chartAndTable_tabs",
-                                                            tabPanel("Chart", 
-                                                                     fluidRow(
-                                                                       column(6,
-                                                                              tags$style(type = "text/css", "#c5_state1 {min-height:30vh !important;}"),
-                                                                              plotlyOutput("c5_state1")),
-                                                                       column(6,
-                                                                              tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
-                                                                              plotlyOutput("c5_state2"))
-                                                                     )
-                                                            ),
-                                                            tabPanel("Table",
-                                                                     fluidRow(
-                                                                       column(6,
-                                                                              tags$style(type = "text/css", "#c5_state1_table {min-height:30vh !important;}"),
-                                                                              DTOutput("c5_state1_table")),
-                                                                       column(6,
-                                                                              tags$style(type = "text/css", "#c5_state2_table {min-height:30vh !important;}"),
-                                                                              DTOutput("c5_state2_table"))
-                                                                     )
-                                                            )
-                                                )
-                                       )    
-                                ),
-                             
+                              fluidRow(
+                                
+                                  tabBox(id = "hideTabs", title = "Injuries, Fatalities, Loss", side = "left", width = 12,
+                                         
+                                         # -----------------------------
+                                         # C5
+                                         tabPanel("", br(), #C5
+                                                  tabsetPanel(id = "chartAndTable_tabs",
+                                                              tabPanel("Chart", 
+                                                                       fluidRow(
+                                                                         column(6,
+                                                                                tags$style(type = "text/css", "#c5_state1 {min-height:30vh !important;}"),
+                                                                                plotlyOutput("c5_state1")),
+                                                                         column(6,
+                                                                                tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                plotlyOutput("c5_state2"))
+                                                                       )
+                                                              ),
+                                                              tabPanel("Table",
+                                                                       fluidRow(
+                                                                         column(6,
+                                                                                tags$style(type = "text/css", "#c5_state1_table {min-height:30vh !important;}"),
+                                                                                DTOutput("c5_state1_table")),
+                                                                         column(6,
+                                                                                tags$style(type = "text/css", "#c5_state2_table {min-height:30vh !important;}"),
+                                                                                DTOutput("c5_state2_table"))
+                                                                       )
+                                                              )
+                                                  )
+                                         )    
+                                  )
+                            
+                                )),
+  
                                 fluidRow(column(2, offset = 10, align = 'right',
                                                 actionButton("action_AddCharts", label = "Additional Charts"),
                                                 
-                                         tags$div(id = "extraCharts",
-                                                            fluidRow(
-                                                              tabBox(title = "Tornadoes (summed over all years)", side = "left", width = 12,
-                                                                     
-                                                                     # -----------------------------
-                                                                     # C2
-                                                                     tabPanel("Per Month", #C2
-                                                                              tabsetPanel(id = "chartAndTable_tabs",
-                                                                                          tabPanel("Chart", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c2_state1 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c2_state1")), #, height = "80vh"
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c2_state2 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c2_state2"))
-                                                                                                   )
-                                                                                          ),
-                                                                                          tabPanel("Table", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c2_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c2_state1_table")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c2_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c2_state2_table"))
-                                                                                                   )
-                                                                                          )
-                                                                              )
-                                                                              
-                                                                     ),
-                                                                     
-                                                                     # -----------------------------
-                                                                     # C3
-                                                                     tabPanel("Per Hour", #C3
-                                                                              tabsetPanel(id = "chartAndTable_tabs",
-                                                                                          tabPanel("Chart", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c3_state1 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c3_state1")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c3_state2 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c3_state2"))
-                                                                                                   )
-                                                                                          ),
-                                                                                          tabPanel("Table",
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c3_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c3_state1_table")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c3_state2_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c3_state2_table"))
-                                                                                                   )
-                                                                                          )
-                                                                              )
-                                                                     ),
-                                                                     
-                                                                     # -----------------------------
-                                                                     # C4
-                                                                     tabPanel("Distance From Chicago", #C4
-                                                                              tabsetPanel(id = "chartAndTable_tabs",
-                                                                                          tabPanel("Chart", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c4_state1 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c4_state1")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c4_state2 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c4_state2"))
-                                                                                                   )
-                                                                                          ),
-                                                                                          tabPanel("Table",
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c4_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c4_state1_table")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c4_state2_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c4_state2_table"))
-                                                                                                   )
-                                                                                          )
-                                                                              ),
-                                                                              fluidRow(
-                                                                                column(1, offset = 0, h3("Distance"), align='left'),
-                                                                                column(10, offset = 0, sliderInput("distanceSlider", label = NULL, min = 0, max = 600, value = 300))
-                                                                              ), br()
-                                                                     ) ,
-                                                                     # -----------------------------
-                                                                     # C8
-                                                                     tabPanel("Counties Most Hit", #C8
-                                                                              tabsetPanel(id = "chartAndTable_tabs",
-                                                                                          tabPanel("Chart", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c8_state1 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c8_state1")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c8_state2 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c8_state2"))
-                                                                                                   )
-                                                                                          ),
-                                                                                          tabPanel("Table",
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c8_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c8_state1_table")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c8_state2_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c8_state2_table"))
-                                                                                                   )
-                                                                                          )
-                                                                              )
-                                                                     )
-                                                              )),
-                                                            fluidRow(
-                                                              tabBox(title = "Injuries, Fatalities, Loss (summed over all years)", side = "left", width = 12,
-                                                                     
-                                                                     # -----------------------------
-                                                                     # C6
-                                                                     tabPanel("Per Month", #C6
-                                                                              tabsetPanel(id = "chartAndTable_tabs",
-                                                                                          tabPanel("Chart", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c6_state1 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c6_state1")), #, height = "80vh"
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c6_state2 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c6_state2"))
-                                                                                                   )
-                                                                                          ),
-                                                                                          tabPanel("Table", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c6_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c6_state1_table")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c6_state2_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c6_state2_table"))
-                                                                                                   )
-                                                                                          )
-                                                                              )
-                                                                              
-                                                                     ),
-                                                                     
-                                                                     # -----------------------------
-                                                                     # C7
-                                                                     tabPanel("Per Hour", #C7
-                                                                              tabsetPanel(id = "chartAndTable_tabs",
-                                                                                          tabPanel("Chart", 
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c7_state1 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c7_state1")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c7_state2 {min-height:30vh !important;}"),
-                                                                                                            plotlyOutput("c7_state2"))
-                                                                                                   )
-                                                                                          ),
-                                                                                          tabPanel("Table",
-                                                                                                   fluidRow(
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c7_state1_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c7_state1_table")),
-                                                                                                     column(6,
-                                                                                                            tags$style(type = "text/css", "#c7_state2_table {min-height:30vh !important;}"),
-                                                                                                            DTOutput("c7_state2_table"))
-                                                                                                   )
-                                                                                          )
-                                                                              )
-                                                                     )    
-                                                              )
-                                                            )
-                                                  #tags$p("Ready to take the Shiny tutorial? If so"),
-                                                  #tags$a(href = "shiny.rstudio.com/tutorial", "Click Here!")
-                                         ))
-                                         )))
+                                                tags$div(id = "extraCharts",
+                                                         fluidRow(
+                                                           tabBox(title = "Tornadoes (summed over all years)", side = "left", width = 12,
+                                                                  
+                                                                  # -----------------------------
+                                                                  # C2
+                                                                  tabPanel("Per Month", #C2
+                                                                           tabsetPanel(id = "chartAndTable_tabs",
+                                                                                       tabPanel("Chart", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c2_state1 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c2_state1")), #, height = "80vh"
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c2_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c2_state2"))
+                                                                                                )
+                                                                                       ),
+                                                                                       tabPanel("Table", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c2_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c2_state1_table")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c2_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c2_state2_table"))
+                                                                                                )
+                                                                                       )
+                                                                           )
+                                                                           
+                                                                  ),
+                                                                  
+                                                                  # -----------------------------
+                                                                  # C3
+                                                                  tabPanel("Per Hour", #C3
+                                                                           tabsetPanel(id = "chartAndTable_tabs",
+                                                                                       tabPanel("Chart", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c3_state1 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c3_state1")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c3_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c3_state2"))
+                                                                                                )
+                                                                                       ),
+                                                                                       tabPanel("Table",
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c3_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c3_state1_table")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c3_state2_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c3_state2_table"))
+                                                                                                )
+                                                                                       )
+                                                                           )
+                                                                  ),
+                                                                  
+                                                                  # -----------------------------
+                                                                  # C4
+                                                                  tabPanel("Distance From Chicago", #C4
+                                                                           tabsetPanel(id = "chartAndTable_tabs",
+                                                                                       tabPanel("Chart", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c4_state1 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c4_state1")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c4_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c4_state2"))
+                                                                                                )
+                                                                                       ),
+                                                                                       tabPanel("Table",
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c4_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c4_state1_table")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c4_state2_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c4_state2_table"))
+                                                                                                )
+                                                                                       )
+                                                                           ),
+                                                                           fluidRow(
+                                                                             column(1, offset = 0, h3("Distance"), align='left'),
+                                                                             column(10, offset = 0, sliderInput("distanceSlider", width="100%", label = NULL, min = 0, max = 600, value = 300))
+                                                                           ), br()
+                                                                  ) ,
+                                                                  # -----------------------------
+                                                                  # C8
+                                                                  tabPanel("Counties Most Hit", #C8
+                                                                           tabsetPanel(id = "chartAndTable_tabs",
+                                                                                       tabPanel("Chart", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c8_state1 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c8_state1")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c8_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c8_state2"))
+                                                                                                )
+                                                                                       ),
+                                                                                       tabPanel("Table",
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c8_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c8_state1_table")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c8_state2_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c8_state2_table"))
+                                                                                                )
+                                                                                       )
+                                                                           )
+                                                                  )
+                                                           )),
+                                                         br(),
+                                                         fluidRow(
+                                                           tabBox(title = "Injuries, Fatalities, Loss (summed over all years)", side = "left", width = 12,
+                                                                  
+                                                                  # -----------------------------
+                                                                  # C6
+                                                                  tabPanel("Per Month", #C6
+                                                                           tabsetPanel(id = "chartAndTable_tabs",
+                                                                                       tabPanel("Chart", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c6_state1 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c6_state1")), #, height = "80vh"
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c6_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c6_state2"))
+                                                                                                )
+                                                                                       ),
+                                                                                       tabPanel("Table", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c6_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c6_state1_table")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c6_state2_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c6_state2_table"))
+                                                                                                )
+                                                                                       )
+                                                                           )
+                                                                           
+                                                                  ),
+                                                                  
+                                                                  # -----------------------------
+                                                                  # C7
+                                                                  tabPanel("Per Hour", #C7
+                                                                           tabsetPanel(id = "chartAndTable_tabs",
+                                                                                       tabPanel("Chart", 
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c7_state1 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c7_state1")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c7_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c7_state2"))
+                                                                                                )
+                                                                                       ),
+                                                                                       tabPanel("Table",
+                                                                                                fluidRow(
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c7_state1_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c7_state1_table")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c7_state2_table {min-height:30vh !important;}"),
+                                                                                                         DTOutput("c7_state2_table"))
+                                                                                                )
+                                                                                       )
+                                                                           )
+                                                                  )    
+                                                           )
+                                                         )
+                                                         #tags$p("Ready to take the Shiny tutorial? If so"),
+                                                         #tags$a(href = "shiny.rstudio.com/tutorial", "Click Here!")
+                                                )))
   
                        ),
   
-                       column(6, offset = 0, align = 'justify',
+                       column(8, offset = 0, align = 'justify',
   # -----------------------------
   # C9
                               wellPanel(
                               fluidRow(column(6, offset = 0, align = 'justify',
-                                              tags$style(type = "text/css", "#c9_state1_map {min-height:79vh !important;z-index:5 !important;}"),
+                                              tags$style(type = "text/css", "#c9_state1_map {min-height:74vh !important;z-index:5 !important;}"),
                                               leafletOutput("c9_state1_map")
                                        ),
                                        column(6, offset = 0, align = 'justify',
-                                              tags$style(type = "text/css", "#c9_state2_map {min-height:79vh !important;z-index:5 !important;}"),
+                                              tags$style(type = "text/css", "#c9_state2_map {min-height:74vh !important;z-index:5 !important;}"),
                                               leafletOutput("c9_state2_map")
                                        )
                               ))
@@ -345,7 +349,22 @@ ui <- fluidPage(
                        )
               )
               
-  ),
+  )),
+  
+  column(2,
+         tags$div(class = "padding1"),
+         wellPanel(
+         fluidRow(column(6,h2("State 1 (left)")), column(6,h2("State 2 (right)"))),
+         fluidRow(
+           column(6, offset = 0, align = 'justify',
+                  selectInput("state1_select", label = NULL, width = "100%",
+                              choices = choices_states, selected = "(IL)	Illinois")
+           ),
+           column(6, offset = 0, align = 'justify',
+                  selectInput("state2_select", label = NULL, width = "100%",
+                              choices = choices_states, selected = "(KS)	Kansas")
+           )
+         ))),
   
   column(1, offset = 11, align = 'right',
          dropdownButton(

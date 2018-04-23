@@ -7,6 +7,8 @@ allTornadoes$timestamp <- as.POSIXct(paste(allTornadoes$date, allTornadoes$time)
 
 allStatesLatLng <- read.csv(file = "data/all_states_lat_lng.csv", header = TRUE)
 
+stateBounds <- read.csv(file = "data/state_Bounds.csv", header = TRUE)
+
 # -----------------------------
 server <- function(input, output) {
   
@@ -51,26 +53,33 @@ server <- function(input, output) {
   # -----------------------------
   
   states <- geojsonio::geojson_read("data/states.geojson", what = "sp")
+  states <- sp::merge(states, stateBounds, by = "STUSPS", duplicateGeoms = TRUE)
   
   # use input$MAPID_bounds and input$MAPID_zoom
   # set up observers and proxyleaflet
   
-  state1_map_data <- reactive({
+  state1_map_track_data <- reactive({
     mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
     colnames(mapData)[8] <- "STUSPS"
-    states <- subset(states, STUSPS == getState1())
-    mapData <- sp::merge(states, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    stateSelected <- subset(states, STUSPS == getState1())
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
     #mapData <- subset(mapData, STUSPS == getState1())
   })
   
   # c9 state 1 leaflet
-  output$c9_state1_map <- renderLeaflet({ 
+  output$c9_state1_map <- renderLeaflet({ # initialize map
     
-    #m <- leaflet(states, options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
+    # initialize map to default dropdown state value
+    initState <- filter(stateBounds, STUSPS == "IL")
+    
+    rightB <- initState$right_bound
+    bottomB <- initState$bottom_bound
+    leftB <- initState$left_bound
+    topB <- initState$top_bound
+    
     leaflet(options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
-      setView(lng = (-87.4 + -91.6) / 2.0, lat = (36.7 + 42.6) / 2.0, zoom = 8) %>%
-      #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
-      setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
+      setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
+      setMaxBounds(rightB, bottomB, leftB, topB) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
                        options = providerTileOptions(noWrap = TRUE))
   })
@@ -78,21 +87,47 @@ server <- function(input, output) {
   # Incremental changes to the map should be performed in
   # an observer. Each independent set of things that can change
   # should be managed in its own observer.
-  observe({
+  
+  observe({ # set view and max bounds
     
-    mapData = state1_map_data()
+    activeState <- subset(states, STUSPS == getState1())
+    
+    rightB <- activeState@data$right_bound
+    bottomB <- activeState@data$bottom_bound
+    leftB <- activeState@data$left_bound
+    topB <- activeState@data$top_bound
+    
+    proxy <- leafletProxy("c9_state1_map")
+    
+    # set view and max Bounds
+    proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>% 
+              setMaxBounds(rightB, bottomB, leftB, topB)
+  })
+  
+  observe({ # track data,
+    
+    mapData = state1_map_track_data()
+    
+    activeState <- subset(states, STUSPS == getState1())
 
+    
     lat_start <- mapData@data$slat
     lat_end <- mapData@data$elat
     
     lon_start <- mapData@data$slon
     lon_end <- mapData@data$elon
     
-    state <- toString(mapData@data$STUSPS[1])
+    #state <- toString(mapData@data$STUSPS[1])
     
-    proxy <- leafletProxy("c9_state1_map", data = mapData) %>% clearShapes() %>%
-      addPolygons(weight = 3, opacity = 1, color = "black", fillOpacity = 0.0) # %>% this is redundant and draws the state multiple times
-      
+    # get map and clear shapes
+    proxy <- leafletProxy("c9_state1_map", data = mapData) %>% clearShapes()
+    
+    # outline of all states
+    proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.0, fillColor = "black")
+    
+    # active state outline and fill
+    proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.1, fillColor = "black")
+    
     for(i in 1:length(lat_start)){
       
       if (!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0)) {
@@ -129,10 +164,10 @@ server <- function(input, output) {
     
   })
   
-  #outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE)
+  outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE) # causes errors in console? don't use?
   
   # c9 state 2 leaflet
-  output$c9_state2_map <- renderLeaflet({ 
+  output$c9_state2_map <- renderLeaflet({ # initialize map to default dropdown state value
     
     m <- leaflet(states, options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
       setView(lng = (-87.4 + -91.6) / 2.0, lat = (36.7 + 42.6) / 2.0, zoom = 8) %>%
@@ -142,6 +177,19 @@ server <- function(input, output) {
                        options = providerTileOptions(noWrap = TRUE))
     
     m %>% addPolygons(weight = 5, opacity = 1, color = "black", fillOpacity = .1)
+  })
+  
+  # overview leaflet
+  output$overview_map <- renderLeaflet({ 
+    
+    m <- leaflet(states, options = leafletOptions(minZoom = 6, maxZoom = 16)) %>%
+      setView(lng = -96, lat = 37.8, zoom = 6) %>%
+      #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
+      #setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
+      addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
+                       options = providerTileOptions(noWrap = TRUE))
+    
+    m %>% addPolygons(weight = 5, opacity = .5, color = "black", fillOpacity = .1)
   })
   
   # -----------------------------

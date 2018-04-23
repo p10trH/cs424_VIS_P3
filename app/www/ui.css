@@ -369,7 +369,7 @@ body {
 
 /* ---------------------------------- */
 
-.nav-tabs-custom {padding: 20px; margin-bottom: 20px; background-color: #AAAAAA; color: #484747; border-radius: 4px;}
+.nav-tabs-custom {padding: 20px 20px 0px 20px; margin: 3px 0px 3px 0px; background-color: #AAAAAA; color: #484747; border-radius: 4px;}
 
 /* ---------------------------------- */
 
@@ -528,10 +528,10 @@ h2 {font-size: 35px; font-weight: bold;  }
     display: none;
     position: absolute;
     background-color: rgb(72, 71, 71, .95);
-    min-height:71vh;
-    min-width: 2200px;
+    min-height: 77vh;
+    min-width: 1850px;
     bottom: 60px;
-    left: 390px;
+    left: 330px;
     z-index: 9;
     padding: 20px 20px 10px 20px;
 }
@@ -539,7 +539,11 @@ h2 {font-size: 35px; font-weight: bold;  }
 
 /* ---------------------------------- */
 
+.padding1 {
 
+    height:92px;
+
+}
 
 /* ---------------------------------- */
 
