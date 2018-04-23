@@ -454,6 +454,11 @@ body {
 #action_Settings {padding: 10px 20px 10px 20px; margin-top: -47px; margin-right: 10px;}
 #action_About {padding: 10px 20px 10px 20px; margin-top: -47px; margin-right: 20px;}
 
+#action_AddCharts {
+    font-size: 32px;
+    margin-right: 20px;
+}
+
 /* ---------------------------------- */
 
 h1 {display: inline-flex; font-size: 72px; font-weight: bold; color: #484747; padding: 55px 50px 0px 0px;}
@@ -519,7 +524,17 @@ h2 {font-size: 35px; font-weight: bold;  }
 
 /* ---------------------------------- */
 
-
+#extraCharts {
+    display: none;
+    position: absolute;
+    background-color: rgb(72, 71, 71, .95);
+    min-height:71vh;
+    min-width: 2200px;
+    bottom: 60px;
+    left: 390px;
+    z-index: 9;
+    padding: 20px 20px 10px 20px;
+}
 
 
 /* ---------------------------------- */

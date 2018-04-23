@@ -26,5 +26,7 @@ library(dygraphs)
 
 library(geosphere)
 
+library(shinyjs)
+
 # -----------------------------
 

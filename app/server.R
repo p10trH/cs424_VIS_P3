@@ -43,6 +43,13 @@ server <- function(input, output) {
   
   # -----------------------------
   
+  observeEvent(input$action_AddCharts, {
+    #toggle("extraCharts", anim = TRUE, time = 1, animType = "fade")  # toggle is a shinyjs function
+    toggle("extraCharts")  # toggle is a shinyjs function
+  })
+  
+  # -----------------------------
+  
   states <- geojsonio::geojson_read("data/states.geojson", what = "sp")
   
   # use input$MAPID_bounds and input$MAPID_zoom
