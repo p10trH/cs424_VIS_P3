@@ -439,15 +439,62 @@ body {
 
 /* ---------------------------------- */
 
-.checkbox{font-size: 26px !important;}
+.checkbox{
+    font-size: 26px !important;
+}
 
-#magnitudes_Input {font-size: 26px !important;}
+#magnitudes_Input {
+    font-size: 26px !important;
+}
+
+input[type=checkbox] {
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari and Chrome */
+  -o-transform: scale(2); /* Opera */
+  margin-top: 12px;
+}
+
+input[type=checkbox]:checked + span{
+    background-color: #484747;
+} 
 
 .checkbox-inline {
 
-    padding-right: 40px;
-    padding-left: 40px;
+    padding-right: 30px;
+    padding-left: 30px;
 }
+
+.checkbox-inline > span {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.checkbox > label > span {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* ---------------------------------- */
+
+input[type=radio] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(2); /* IE */
+    -moz-transform: scale(2); /* FF */
+    -webkit-transform: scale(2); /* Safari and Chrome */
+    -o-transform: scale(2); /* Opera */
+    margin-top: 12px;
+}
+
+.radio > label > span {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+input[type=radio]:checked + span{
+    background-color: #484747;
+} 
 
 /* ---------------------------------- */
 
@@ -513,6 +560,14 @@ h2 {font-size: 35px; font-weight: bold;  }
 /* ---------------------------------- */
 
 .leaflet-control {
+    color: #484747;
+    font-size: 26px !important;
+    /*display: none !important;*/
+}
+
+.leaflet-control-measure {
+    color: #484747;
+    font-size: 26px !important;
     /*display: none !important;*/
 }
 
@@ -521,11 +576,19 @@ h2 {font-size: 35px; font-weight: bold;  }
 }
 
 .leaflet-left {
-    left: 0px !important;
+    left: 10px !important;
 }
 
 .leaflet-top {
-    top: 400px !important;
+    top: 10px !important;
+}
+
+.leaflet-right {
+    right: 10px !important;
+}
+
+.leaflet-bottom {
+    bottom: 10px !important;
 }
 
 

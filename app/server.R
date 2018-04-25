@@ -28,8 +28,18 @@ server <- function(input, output) {
   # Get System of Measurement; 1 = Metric, 2 = Imperial
   getMSystem <- reactive({input$mSystem_radio})
   
+  # Get width slider for maps
   getWidthLower <- reactive({input$width_dSlider[1]})
   getWidthUpper <- reactive({input$width_dSlider[2]})
+  
+  # Get magnitudes for maps
+  getMagnitudes <- reactive({input$magnitudes_Input})
+  
+  # Get zoom State 1
+  getZoomState1 <- reactive({input$c9_state1_map_zoom})
+  
+  # Get zoom State 2
+  getZoomState2 <- reactive({input$c9_state2_map_zoom})
   
   output$logText <- renderPrint({
     print("Year as Num:")
@@ -105,6 +115,7 @@ server <- function(input, output) {
   state1_map_track_data <- reactive({
     
     mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
+    mapData <- filter(mapData, mag %in% getMagnitudes())
     #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     colnames(mapData)[8] <- "STUSPS"
     stateSelected <- subset(states, STUSPS == getState1())
@@ -115,7 +126,9 @@ server <- function(input, output) {
   })
   
   state2_map_track_data <- reactive({
+    
     mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+    mapData <- filter(mapData, mag %in% getMagnitudes())
     #mapData <- filter(mapData, wid >= input$width_dSlider[1] & wid <= input$width_dSlider[2])
     colnames(mapData)[8] <- "STUSPS"
     stateSelected <- subset(states, STUSPS == getState2())
@@ -142,7 +155,7 @@ server <- function(input, output) {
       setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
       setMaxBounds(rightB, bottomB, leftB, topB) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
-                       options = providerTileOptions(noWrap = TRUE))
+                       options = providerTileOptions(noWrap = TRUE)) #%>% addMeasure()
   })
   
   # Incremental changes to the map should be performed in
@@ -163,6 +176,13 @@ server <- function(input, output) {
     # set view and max Bounds
     proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>% 
               setMaxBounds(rightB, bottomB, leftB, topB)
+  })
+  
+  observe({ # sync zoom
+    
+    zLevel <- getZoomState2()
+    
+    runjs(paste("var el = document.getElementById(\"c9_state1_map\"); var map = $(el).data(\"leaflet-map\"); map.setZoom(", zLevel,")"))
   })
   
   observe({ # track data,
@@ -240,7 +260,7 @@ server <- function(input, output) {
       #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
       setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
-                       options = providerTileOptions(noWrap = TRUE))
+                       options = providerTileOptions(noWrap = TRUE)) #%>% addMeasure()
     
     m %>% addPolygons(weight = 5, opacity = 1, color = "black", fillOpacity = .1)
   })
@@ -253,7 +273,17 @@ server <- function(input, output) {
       #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
       #setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
-                       options = providerTileOptions(noWrap = TRUE))
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMiniMap(
+        tiles = providers$Stamen.TonerLite,
+        toggleDisplay = TRUE,
+        width = 400, height = 400,
+        collapsedWidth = 50, collapsedHeight = 50) %>% 
+      addMeasure(    position = "bottomleft",
+                     primaryLengthUnit = "meters",
+                     primaryAreaUnit = "sqmeters",
+                     activeColor = "#3D535D",
+                     completedColor = "#3D535D")
     
     m %>% addPolygons(weight = 5, opacity = .5, color = "black", fillOpacity = .1)
   })
