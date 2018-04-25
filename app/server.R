@@ -28,6 +28,9 @@ server <- function(input, output) {
   # Get System of Measurement; 1 = Metric, 2 = Imperial
   getMSystem <- reactive({input$mSystem_radio})
   
+  getWidthLower <- reactive({input$width_dSlider[1]})
+  getWidthUpper <- reactive({input$width_dSlider[2]})
+  
   output$logText <- renderPrint({
     print("Year as Num:")
     print(getYearAsNum())
@@ -51,20 +54,78 @@ server <- function(input, output) {
   })
   
   # -----------------------------
+  # Leaflet
   
   states <- geojsonio::geojson_read("data/states.geojson", what = "sp")
   states <- sp::merge(states, stateBounds, by = "STUSPS", duplicateGeoms = TRUE)
+  
+  # -----------------------------
+  # Input Controls
+  
+  output$width_dSlider <- renderUI({
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+    
+    mapData1 <- filter(allTornadoes, st == getState1())
+    mapData2 <- filter(allTornadoes, st == getState2())
+
+    maxState1 <- max(mapData1$wid, na.rm = TRUE)
+    minState1 <- min(mapData1$wid, na.rm = TRUE)
+    
+    maxState2 <- max(mapData2$wid, na.rm = TRUE)
+    minState2 <- min(mapData2$wid, na.rm = TRUE)
+    
+    sliderInput(inputId = "width_dSlider", label = NULL, width = "100%", post = NULL, step = 1,
+                min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
+    
+    # startDate <- as.Date(paste(substr(input$slider_month, 2, 3), '01-2017', sep = "-"), "%m-%d-%Y")
+    # 
+    # choices_day <- format(seq.Date(from = startDate, length.out = as.numeric(days_in_month(startDate)), by="day"), "(%d)  %a")
+    # 
+    # if(!is.null(input$slider_day)) {
+    #   
+    #   dateToShow <- getDate()
+    # }
+    # 
+    # message(dateToShow)
+    # 
+    # sliderTextInput(
+    #   inputId = "slider_day",
+    #   label = NULL, width = '100%', grid = TRUE, force_edges = TRUE, hide_min_max = TRUE,
+    #   choices = choices_day, selected = choices_day[day(mdy(dateToShow))]
+    # )
+  })
+  
+  # -----------------------------
   
   # use input$MAPID_bounds and input$MAPID_zoom
   # set up observers and proxyleaflet
   
   state1_map_track_data <- reactive({
+    
     mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
+    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     colnames(mapData)[8] <- "STUSPS"
     stateSelected <- subset(states, STUSPS == getState1())
     mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
     #mapData <- subset(mapData, STUSPS == getState1())
+    
+    return(mapData)
   })
+  
+  state2_map_track_data <- reactive({
+    mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+    #mapData <- filter(mapData, wid >= input$width_dSlider[1] & wid <= input$width_dSlider[2])
+    colnames(mapData)[8] <- "STUSPS"
+    stateSelected <- subset(states, STUSPS == getState2())
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    #mapData <- subset(mapData, STUSPS == getState1())
+    
+    return(mapData)
+  })
+  
+  
   
   # c9 state 1 leaflet
   output$c9_state1_map <- renderLeaflet({ # initialize map
@@ -107,6 +168,9 @@ server <- function(input, output) {
   observe({ # track data,
     
     mapData = state1_map_track_data()
+    mapData <- subset(mapData, wid >= input$width_dSlider[1] & wid <= input$width_dSlider[2])
+    
+    #mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     
     activeState <- subset(states, STUSPS == getState1())
 
@@ -128,14 +192,16 @@ server <- function(input, output) {
     # active state outline and fill
     proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.1, fillColor = "black")
     
+    if (length(lat_start) > 0) {
     for(i in 1:length(lat_start)){
       
-      if (!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0)) {
+      if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
         
           proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
                                        lng = c(lon_start[i],lon_end[i]),
                                 weight = 20, opacity = 0.35, color = "#FF5600")
       }
+    }
     }
     
     proxy %>%
@@ -164,7 +230,7 @@ server <- function(input, output) {
     
   })
   
-  outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE) # causes errors in console? don't use?
+  #outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE) # causes errors in console? don't use?
   
   # c9 state 2 leaflet
   output$c9_state2_map <- renderLeaflet({ # initialize map to default dropdown state value
@@ -192,7 +258,7 @@ server <- function(input, output) {
     m %>% addPolygons(weight = 5, opacity = .5, color = "black", fillOpacity = .1)
   })
   
-  # -----------------------------
+  #-----------------------
   
   # Dimitar----
   textSize <- 15

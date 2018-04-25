@@ -408,14 +408,14 @@ body {
 
 /* ---------------------------------- */
 
-.irs {margin-top: 60px;}
+.irs {margin-top: 30px;}
 .irs-grid-pol.small {height: 0px;}
 .irs-grid-pol {height: 15px; width: 5px; top: 17px; background: #666666;}
 
 /* ---------------------------------- */
 
-.irs-grid-text {font-size: 18px; color: white; z-index: 0; bottom: -20px;}
-.irs-single {font-size: 24px; color: white; background: #484747; top: 63px; z-index:1; padding-left: 5px; padding-right: 5px;}
+.irs-grid-text {font-size: 20px; color: white; z-index: 0; bottom: -20px;}
+.irs-single {font-size: 26px; color: white; background: #484747; top: 63px; z-index:1; padding-left: 5px; padding-right: 5px;}
 .irs-slider {background: #666666; width: 30px; height: 45px; top: 15px; border-radius: 4px;}
 .irs-slider:hover {background: #666666; width: 30px; height: 45px; top: 15px; border-radius: 4px;}
 .irs-bar {width: 100%; height: 25px; background: #484747; border-top: 1px solid #484747; border-bottom: 1px solid #484747;}
@@ -425,7 +425,7 @@ body {
 /* ---------------------------------- */
 
 .irs-min, .irs-max {display: none;}
-.irs-to, .irs-from {font-size: 24px; color: white; background: #484747; top: -15px;}
+.irs-to, .irs-from {font-size: 26px; color: white; background: #484747; top: -25px;}
 
 /* ---------------------------------- */
 
@@ -440,6 +440,14 @@ body {
 /* ---------------------------------- */
 
 .checkbox{font-size: 26px !important;}
+
+#magnitudes_Input {font-size: 26px !important;}
+
+.checkbox-inline {
+
+    padding-right: 40px;
+    padding-left: 40px;
+}
 
 /* ---------------------------------- */
 
@@ -541,7 +549,7 @@ h2 {font-size: 35px; font-weight: bold;  }
 
 .padding1 {
 
-    height:92px;
+    height:112px;
 
 }
 

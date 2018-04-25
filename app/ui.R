@@ -36,9 +36,10 @@ ui <- fluidPage(
   # -----------------------------
   # App title & modal buttons
   
+  br(),
   fluidRow(column(8, offset = 2, align = 'justify',
                   sliderTextInput(inputId = "slider_years", 
-                    label = NULL, width = '100%', grid = TRUE, force_edges = TRUE, hide_min_max = TRUE,
+                    label = NULL, width = '100%', grid = TRUE, force_edges = FALSE, hide_min_max = TRUE,
                     choices = choices_years, selected = '1992',
                     animate=animationOptions(interval = 2000, loop = FALSE, playButton = NULL, pauseButton= NULL)
                   )),
@@ -59,7 +60,7 @@ ui <- fluidPage(
   # -----------------------------
   # Overview
               
-              tabPanel("Overview", br(),
+              tabPanel("Overview", br(), br(),
                        column(3),
                        column(9,
                               wellPanel(
@@ -73,7 +74,7 @@ ui <- fluidPage(
   # -----------------------------
   # Explore Further
                        
-              tabPanel("Explore Further", br(),
+              tabPanel("Explore Further", br(), br(),
 
                        column(4, offset = 0, align = 'justify',
                               wellPanel(
@@ -351,20 +352,46 @@ ui <- fluidPage(
               
   )),
   
+  # -----------------------------
+  # Inputs
+  
   column(2,
          tags$div(class = "padding1"),
          wellPanel(
-         fluidRow(column(6,h2("State 1 (left)")), column(6,h2("State 2 (right)"))),
-         fluidRow(
-           column(6, offset = 0, align = 'justify',
-                  selectInput("state1_select", label = NULL, width = "100%",
-                              choices = choices_states, selected = "(IL)	Illinois")
-           ),
-           column(6, offset = 0, align = 'justify',
-                  selectInput("state2_select", label = NULL, width = "100%",
-                              choices = choices_states, selected = "(KS)	Kansas")
+           fluidRow(column(6, align = "left", h2("State 1 (left)")), column(6, align = "left", h2("State 2 (right)"))),
+           br(),
+           fluidRow(
+             column(6, offset = 0, align = 'justify',
+                    selectInput("state1_select", label = NULL, width = "100%",
+                                choices = choices_states, selected = "(IL)	Illinois")
+             ),
+             column(6, offset = 0, align = 'justify',
+                    selectInput("state2_select", label = NULL, width = "100%",
+                                choices = choices_states, selected = "(KS)	Kansas")
+             ))
+         ),
+         wellPanel(
+           fluidRow(column(12, align = "left", h2("Magnitudes"))),
+           br(),
+           checkboxGroupInput("magnitudes_Input", label = NULL, inline = TRUE,
+                              choices = list("UNKNOWN" = -9, "0" = 0, "1" = 1, "2" = 2, "3" = 3, "4" = 4, "5" = 5),
+                              selected = c(0, 1, 2, 3, 4, 5)),
+           
+           br(), br(),
+           
+           fluidRow(column(12, align = "left", h2("Width"))),
+           fluidRow(column(10, offset = 1, align = 'justify',
+                           uiOutput("width_dSlider")))
            )
-         ))),
+         
+         
+         
+         
+         
+         ),
+  
+  # -----------------------------
+  # log
   
   column(1, offset = 11, align = 'right',
          dropdownButton(
