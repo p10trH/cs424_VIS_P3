@@ -28,10 +28,6 @@ server <- function(input, output) {
   # Get System of Measurement; 1 = Metric, 2 = Imperial
   getMSystem <- reactive({input$mSystem_radio})
   
-  # Get width slider for maps
-  getWidthLower <- reactive({input$width_dSlider[1]})
-  getWidthUpper <- reactive({input$width_dSlider[2]})
-  
   # Get magnitudes for maps
   getMagnitudes <- reactive({input$magnitudes_Input})
   
@@ -40,6 +36,14 @@ server <- function(input, output) {
   
   # Get zoom State 2
   getZoomState2 <- reactive({input$c9_state2_map_zoom})
+  
+  # Get width slider for maps
+  getWidthLower <- reactive({input$width_dSlider[1]})
+  getWidthUpper <- reactive({input$width_dSlider[2]})
+  
+  # Get length slider for maps
+  getLengthLower <- reactive({input$length_dSlider[1]})
+  getLengthUpper <- reactive({input$length_dSlider[2]})
   
   output$logText <- renderPrint({
     print("Year as Num:")
@@ -72,7 +76,7 @@ server <- function(input, output) {
   # -----------------------------
   # Input Controls
   
-  output$width_dSlider <- renderUI({
+  output$width_dSlider <- renderUI({ # width
     
     #mapData1 <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
     #mapData2 <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
@@ -86,7 +90,7 @@ server <- function(input, output) {
     maxState2 <- max(mapData2$wid, na.rm = TRUE)
     minState2 <- min(mapData2$wid, na.rm = TRUE)
     
-    sliderInput(inputId = "width_dSlider", label = NULL, width = "100%", post = NULL, step = 1,
+    sliderInput(inputId = "width_dSlider", label = NULL, width = "100%", post = " yds", step = 1,
                 min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
     
     # startDate <- as.Date(paste(substr(input$slider_month, 2, 3), '01-2017', sep = "-"), "%m-%d-%Y")
@@ -105,6 +109,26 @@ server <- function(input, output) {
     #   label = NULL, width = '100%', grid = TRUE, force_edges = TRUE, hide_min_max = TRUE,
     #   choices = choices_day, selected = choices_day[day(mdy(dateToShow))]
     # )
+  })
+  
+  output$length_dSlider <- renderUI({
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+    
+    mapData1 <- filter(allTornadoes, st == getState1())
+    mapData2 <- filter(allTornadoes, st == getState2())
+    
+    maxState1 <- max(mapData1$len, na.rm = TRUE)
+    minState1 <- min(mapData1$len, na.rm = TRUE)
+    
+    maxState2 <- max(mapData2$len, na.rm = TRUE)
+    minState2 <- min(mapData2$len, na.rm = TRUE)
+    
+    sliderInput(inputId = "length_dSlider", label = NULL, width = "100%", post = " mi", step = 1,
+                min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
+    
+
   })
   
   # -----------------------------
@@ -188,7 +212,8 @@ server <- function(input, output) {
   observe({ # track data,
     
     mapData = state1_map_track_data()
-    mapData <- subset(mapData, wid >= input$width_dSlider[1] & wid <= input$width_dSlider[2])
+    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
     
     #mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     

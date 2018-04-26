@@ -381,8 +381,16 @@ ui <- fluidPage(
            
            fluidRow(column(12, align = "left", h2("Width"))),
            fluidRow(column(10, offset = 1, align = 'justify',
-                           uiOutput("width_dSlider")))
+                           uiOutput("width_dSlider"))),
+           
+           br(), br(),
+           
+           fluidRow(column(12, align = "left", h2("Length"))),
+           fluidRow(column(10, offset = 1, align = 'justify',
+                           uiOutput("length_dSlider")))
+           
            )
+         
          
          
          
