@@ -4,7 +4,6 @@
 
 load("data/allTornadoes_Final.RData")
 
-
 allStatesLatLng <- read.csv(file = "data/all_states_lat_lng.csv", header = TRUE)
 
 stateBounds <- read.csv(file = "data/state_Bounds.csv", header = TRUE)
@@ -777,6 +776,11 @@ server <- function(input, output) {
 # -----------------------------------------
 # what I did to .Rdata file
 
+# 
+# linMap <- function(x, from, to)
+#   (x - min(x)) / max(x - min(x)) * (to - from) + from
+# 
+# 
 # allTornadoes <- read.csv(file = "data/all_tornadoes.csv", header = TRUE)
 # allTornadoes$timestamp <- as.POSIXct(paste(allTornadoes$date, allTornadoes$time), format="%Y-%m-%d %H:%M:%S")
 # 
@@ -813,4 +817,21 @@ server <- function(input, output) {
 #     allTornadoes$loss_updated[i] <- (allTornadoes$loss[i])
 #   
 # }
+# 
+# allTornadoes$f1 <- formatC(allTornadoes$f1, width = 3, format = "d", flag = "0")
+# allTornadoes$f2 <- formatC(allTornadoes$f2, width = 3, format = "d", flag = "0")
+# allTornadoes$f3 <- formatC(allTornadoes$f3, width = 3, format = "d", flag = "0")
+# allTornadoes$f4 <- formatC(allTornadoes$f4, width = 3, format = "d", flag = "0")
+# 
+# injWeight = 1
+# fatWeight = 1
+# lossWeight = 1
+# 
+# allTornadoes$injScore <- linMap(allTornadoes$inj, 0, 100) * injWeight
+# allTornadoes$fatScore <- linMap(allTornadoes$fat, 0, 100) * fatWeight
+# allTornadoes$lossScore <- linMap(allTornadoes$loss, 0, 100) * lossWeight
+# 
+# allTornadoes <- allTornadoes %>% mutate(destructionScore = injScore + fatScore + lossScore)
+# 
 # save(allTornadoes, file = "allTornadoes_Final.RData")
+# 
