@@ -371,11 +371,11 @@ ui <- fluidPage(
              ))
          ),
          wellPanel(
-           fluidRow(column(12, align = "left", h2("Magnitudes"))),
+           fluidRow(column(12, align = "justify", h2("Magnitudes"))),
            br(),
-           checkboxGroupInput("magnitudes_Input", label = NULL, inline = TRUE,
+           fluidRow(column(10, offset = 1, align = "left", checkboxGroupInput("magnitudes_Input", label = NULL, inline = TRUE,
                               choices = list("UNKNOWN" = -9, "0" = 0, "1" = 1, "2" = 2, "3" = 3, "4" = 4, "5" = 5),
-                              selected = c(0, 1, 2, 3, 4, 5)),
+                              selected = c(0, 1, 2, 3, 4, 5)))),
            
            br(), br(),
            
@@ -387,16 +387,50 @@ ui <- fluidPage(
            
            fluidRow(column(12, align = "left", h2("Length"))),
            fluidRow(column(10, offset = 1, align = 'justify',
-                           uiOutput("length_dSlider")))
+                           uiOutput("length_dSlider"))),
            
-           )
+           br(), br(),
+           
+           fluidRow(column(12, align = "left", h2("Injuries"))),
+           fluidRow(column(10, offset = 1, align = 'justify',
+                           uiOutput("injuries_dSlider"))),
+           
+           br(), br(),
+           
+           fluidRow(column(12, align = "left", h2("Fatalities"))),
+           fluidRow(column(10, offset = 1, align = 'justify',
+                           uiOutput("fatalities_dSlider"))),
+           
+           br(), br(),
+           
+           fluidRow(column(1, align = "left", h2("Loss")), column(2, align = "left", h3("(in millions)"))),
+           fluidRow(column(10, offset = 1, align = 'justify',
+                           uiOutput("loss_dSlider"))),
+           br(),
+           fluidRow(column(12, align = "right", h5("Note: Entry of 0 does not mean $0")))
+
+        ),
+        wellPanel(
+          fluidRow(column(6, align = "left", h2("Mapping")), column(6, align = "left", h2("Based On"))),
+          br(),
+          fluidRow(column(5, offset = 1, align = "justify", checkboxGroupInput("mapping_Input", label = NULL, inline = TRUE,
+                                                            choices = list("Color" = 1, "Width" = 2),
+                                                            selected = c())),
+                   column(5, align = "justify", selectInput("basedOn_Select", label = NULL, 
+                                                            choices = list("Magnitude" = 1, "Width" = 2, "Length" = 3, "Injuries" = 4, "Fatalities" = 5, "Loss" = 6), 
+                                                            selected = 1))
+                   
+                   
+                   
+                   )
+        )
          
          
          
          
          
          
-         ),
+  ),
   
   # -----------------------------
   # log

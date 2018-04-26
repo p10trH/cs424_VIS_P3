@@ -2,8 +2,8 @@
 # Define Server
 # -----------------------------
 
-allTornadoes <- read.csv(file = "data/all_tornadoes.csv", header = TRUE)
-allTornadoes$timestamp <- as.POSIXct(paste(allTornadoes$date, allTornadoes$time), format="%Y-%m-%d %H:%M:%S")
+load("data/allTornadoes_Final.RData")
+
 
 allStatesLatLng <- read.csv(file = "data/all_states_lat_lng.csv", header = TRUE)
 
@@ -45,6 +45,20 @@ server <- function(input, output) {
   getLengthLower <- reactive({input$length_dSlider[1]})
   getLengthUpper <- reactive({input$length_dSlider[2]})
   
+  # Get injuries slider for maps
+  getInjuriesLower <- reactive({input$injuries_dSlider[1]})
+  getInjuriesUpper <- reactive({input$injuries_dSlider[2]})
+  
+  # Get fatalities slider for maps
+  getFatalitiesLower <- reactive({input$fatalities_dSlider[1]})
+  getFatalitiesUpper <- reactive({input$fatalities_dSlider[2]})
+  
+  # Get loss slider for maps
+  getLossLower <- reactive({(input$loss_dSlider[1] * 1000000)})
+  getLossUpper <- reactive({(input$loss_dSlider[2] * 1000000)})
+  
+  
+
   output$logText <- renderPrint({
     print("Year as Num:")
     print(getYearAsNum())
@@ -75,11 +89,13 @@ server <- function(input, output) {
   
   # -----------------------------
   # Input Controls
-  
+
   output$width_dSlider <- renderUI({ # width
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+    #selYear <- getYearAsNum()
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
     
     mapData1 <- filter(allTornadoes, st == getState1())
     mapData2 <- filter(allTornadoes, st == getState2())
@@ -90,31 +106,21 @@ server <- function(input, output) {
     maxState2 <- max(mapData2$wid, na.rm = TRUE)
     minState2 <- min(mapData2$wid, na.rm = TRUE)
     
-    sliderInput(inputId = "width_dSlider", label = NULL, width = "100%", post = " yds", step = 1,
+    #sliderInput(inputId = "width_dSlider", label = NULL, width = "100%", post = " yds", step = 1,
+    #            min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(getWidthLower(), getWidthUpper()))
+    
+    sliderInput(inputId = "width_dSlider", label = NULL, width = "100%", post = " yds", step = 1, round = TRUE,
                 min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
     
-    # startDate <- as.Date(paste(substr(input$slider_month, 2, 3), '01-2017', sep = "-"), "%m-%d-%Y")
-    # 
-    # choices_day <- format(seq.Date(from = startDate, length.out = as.numeric(days_in_month(startDate)), by="day"), "(%d)  %a")
-    # 
-    # if(!is.null(input$slider_day)) {
-    #   
-    #   dateToShow <- getDate()
-    # }
-    # 
-    # message(dateToShow)
-    # 
-    # sliderTextInput(
-    #   inputId = "slider_day",
-    #   label = NULL, width = '100%', grid = TRUE, force_edges = TRUE, hide_min_max = TRUE,
-    #   choices = choices_day, selected = choices_day[day(mdy(dateToShow))]
-    # )
+    
   })
   
   output$length_dSlider <- renderUI({
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+    #selYear <- getYearAsNum()
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
     
     mapData1 <- filter(allTornadoes, st == getState1())
     mapData2 <- filter(allTornadoes, st == getState2())
@@ -125,10 +131,68 @@ server <- function(input, output) {
     maxState2 <- max(mapData2$len, na.rm = TRUE)
     minState2 <- min(mapData2$len, na.rm = TRUE)
     
-    sliderInput(inputId = "length_dSlider", label = NULL, width = "100%", post = " mi", step = 1,
+    sliderInput(inputId = "length_dSlider", label = NULL, width = "100%", post = " mi", step = 1, round = TRUE,
                 min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
+  })
+  
+  output$injuries_dSlider <- renderUI({
     
-
+    #selYear <- getYearAsNum()
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    
+    mapData1 <- filter(allTornadoes, st == getState1())
+    mapData2 <- filter(allTornadoes, st == getState2())
+    
+    maxState1 <- max(mapData1$inj, na.rm = TRUE)
+    minState1 <- min(mapData1$inj, na.rm = TRUE)
+    
+    maxState2 <- max(mapData2$inj, na.rm = TRUE)
+    minState2 <- min(mapData2$inj, na.rm = TRUE)
+    
+    sliderInput(inputId = "injuries_dSlider", label = NULL, width = "100%", post = NULL, step = 1,
+                min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
+  })
+  
+  output$fatalities_dSlider <- renderUI({
+    
+    #selYear <- getYearAsNum()
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    
+    mapData1 <- filter(allTornadoes, st == getState1())
+    mapData2 <- filter(allTornadoes, st == getState2())
+    
+    maxState1 <- max(mapData1$fat, na.rm = TRUE)
+    minState1 <- min(mapData1$fat, na.rm = TRUE)
+    
+    maxState2 <- max(mapData2$fat, na.rm = TRUE)
+    minState2 <- min(mapData2$fat, na.rm = TRUE)
+    
+    sliderInput(inputId = "fatalities_dSlider", label = NULL, width = "100%", post = NULL, step = 1,
+                min = min(minState1, minState2, na.rm = TRUE), max = max(maxState1, maxState2, na.rm = TRUE), value = c(min, max))
+  })
+  
+  output$loss_dSlider <- renderUI({
+    
+    #selYear <- getYearAsNum()
+    
+    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    
+    mapData1 <- filter(allTornadoes, st == getState1())
+    mapData2 <- filter(allTornadoes, st == getState2())
+    
+    maxState1 <- max(mapData1$loss_updated, na.rm = TRUE)
+    minState1 <- min(mapData1$loss_updated, na.rm = TRUE)
+    
+    maxState2 <- max(mapData2$loss_updated, na.rm = TRUE)
+    minState2 <- min(mapData2$loss_updated, na.rm = TRUE)
+    
+    sliderInput(inputId = "loss_dSlider", label = NULL, width = "100%", post = NULL, pre = "$ ", step = 0.5,
+                min = (min(minState1, minState2, na.rm = TRUE)/1000000), max = (max(maxState1, maxState2, na.rm = TRUE)/1000000), value = c(min, max))
   })
   
   # -----------------------------
@@ -137,6 +201,8 @@ server <- function(input, output) {
   # set up observers and proxyleaflet
   
   state1_map_track_data <- reactive({
+    
+    #selYear <- getYearAsNum()
     
     mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
     mapData <- filter(mapData, mag %in% getMagnitudes())
@@ -150,6 +216,8 @@ server <- function(input, output) {
   })
   
   state2_map_track_data <- reactive({
+    
+    #selYear <- getYearAsNum()
     
     mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
     mapData <- filter(mapData, mag %in% getMagnitudes())
@@ -214,6 +282,9 @@ server <- function(input, output) {
     mapData = state1_map_track_data()
     mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
+    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
     
     #mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     
@@ -244,7 +315,7 @@ server <- function(input, output) {
         
           proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
                                        lng = c(lon_start[i],lon_end[i]),
-                                weight = 20, opacity = 0.35, color = "#FF5600")
+                                weight = 30, opacity = 0.35, color = "#FF0000")
       }
     }
     }
@@ -254,8 +325,8 @@ server <- function(input, output) {
       addCircles(
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
-        weight = 5, fillOpacity = 0.0, radius = 2000,
-        color = "#FF5600",
+        weight = 5, fillOpacity = 0.0, radius = 2500,
+        color = "#FF0000",
         label = paste("Start"),
         labelOptions = labelOptions(style = list(
           "padding" = "10px",
@@ -265,8 +336,8 @@ server <- function(input, output) {
       addCircles(
       lng = ~mapData@data$elon,
       lat = ~mapData@data$elat,
-      weight = 5, fillOpacity = 0.7, radius = 3500,
-      color = "#FF5600",
+      weight = 5, fillOpacity = 0.7, radius = 4000,
+      color = "#FF0000",
       label = paste("End"),
       labelOptions = labelOptions(style = list(
         "padding" = "10px",
@@ -700,3 +771,46 @@ server <- function(input, output) {
   
  
 }
+
+
+
+# -----------------------------------------
+# what I did to .Rdata file
+
+# allTornadoes <- read.csv(file = "data/all_tornadoes.csv", header = TRUE)
+# allTornadoes$timestamp <- as.POSIXct(paste(allTornadoes$date, allTornadoes$time), format="%Y-%m-%d %H:%M:%S")
+# 
+# for (i in 1:nrow(allTornadoes)) {
+#   
+#   if (allTornadoes$yr[i] <= 1995) { # categories
+#     
+#     if (allTornadoes$loss[i] <= 0)
+#       allTornadoes$loss_updated[i] <- 0
+#     else if (allTornadoes$loss[i] == 1)
+#       allTornadoes$loss_updated[i] <- 50
+#     else if (allTornadoes$loss[i] == 2)
+#       allTornadoes$loss_updated[i] <- 250
+#     else if (allTornadoes$loss[i] == 3)
+#       allTornadoes$loss_updated[i] <- 2500
+#     else if (allTornadoes$loss[i] == 4)
+#       allTornadoes$loss_updated[i] <- 25000
+#     else if (allTornadoes$loss[i] == 5)
+#       allTornadoes$loss_updated[i] <- 250000
+#     else if (allTornadoes$loss[i] == 6)
+#       allTornadoes$loss_updated[i] <- 2500000
+#     else if (allTornadoes$loss[i] == 7)
+#       allTornadoes$loss_updated[i] <- 25000000
+#     else if (allTornadoes$loss[i] == 8)
+#       allTornadoes$loss_updated[i] <- 250000000
+#     else if (allTornadoes$loss[i] == 9)
+#       allTornadoes$loss_updated[i] <- 2500000000
+#     else
+#       allTornadoes$loss_updated[i] <- allTornadoes$loss[i]
+#   }
+#   else if (allTornadoes$yr[i] >= 1996 && allTornadoes$yr[i] <= 2015) # multiply times million
+#     allTornadoes$loss_updated[i] <- (allTornadoes$loss[i] * 1000000)
+#   else if (allTornadoes$yr[i] >= 2016) # dollar amount
+#     allTornadoes$loss_updated[i] <- (allTornadoes$loss[i])
+#   
+# }
+# save(allTornadoes, file = "allTornadoes_Final.RData")

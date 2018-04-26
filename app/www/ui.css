@@ -447,6 +447,10 @@ body {
     font-size: 26px !important;
 }
 
+#mapping_Input {
+    font-size: 26px !important;
+}
+
 input[type=checkbox] {
   /* Double-sized Checkboxes */
   -ms-transform: scale(2); /* IE */
@@ -454,6 +458,7 @@ input[type=checkbox] {
   -webkit-transform: scale(2); /* Safari and Chrome */
   -o-transform: scale(2); /* Opera */
   margin-top: 12px;
+  font-size: 26px !important;
 }
 
 input[type=checkbox]:checked + span{
@@ -462,18 +467,18 @@ input[type=checkbox]:checked + span{
 
 .checkbox-inline {
 
-    padding-right: 30px;
-    padding-left: 30px;
+    padding-right: 20px;
+    padding-left: 20px;
 }
 
 .checkbox-inline > span {
-    padding-left: 20px;
+    padding-left: 16px;
     padding-right: 20px;
 }
 
 .checkbox > label > span {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 10px;
+    padding-right: 15px;
 }
 
 /* ---------------------------------- */
@@ -554,6 +559,8 @@ h2 {font-size: 35px; font-weight: bold;  }
 .well {
     background-color: #888888;
     border: 3px double #AAAAAA;
+    padding-bottom: 11px;
+    padding-top: 11px;
 }
 
 
