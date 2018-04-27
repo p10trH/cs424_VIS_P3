@@ -346,7 +346,7 @@ ui <- fluidPage(
                                               leafletOutput("c9_state2_map")
                                        )
                               ))
-                                     
+                                                                   
                        )
               )
               
@@ -423,7 +423,41 @@ ui <- fluidPage(
                    
                    
                    )
-        )
+        ),
+        
+        fluidRow(
+          
+          column(6, align = "left",
+                 
+                 wellPanel(id = "mapLayers_Panel",
+                           fluidRow(column(12, align = "left", h2("Map Layers"))),
+                           fluidRow(column(11, offset = 1, align = "left", checkboxGroupInput("mapLayers_Input", label = NULL, inline = FALSE,
+                                                                                  c("Tracks", "Counties"),
+                                                                                  selected = c("Tracks")))
+                           )
+                   
+                   
+                   
+                 )
+                 
+                 
+                 
+                 ),
+          
+          
+          # wellPanel(id = "mapLayers_Panel",
+          # column(6, offset = 0, align = "left", 
+          #        fluidRow(column(12, align = "left", h2("Map Layers"))),
+          #        checkboxGroupInput("mapLayers_Input", label = NULL, inline = FALSE,
+          #                           c("Tracks", "Counties"),
+          #                           selected = c("Tracks")))
+          # ),
+          column(6, offset = 0, align = "left", 
+                 selectInput("counties_Select", label = NULL,
+                                    c("Tornadoes", "Fatalities", "Injuries", "Loss"), 
+                                    selected = 1))
+          
+       )
          
          
          

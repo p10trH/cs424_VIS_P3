@@ -451,6 +451,10 @@ body {
     font-size: 26px !important;
 }
 
+#mapLayers_Input {
+    font-size: 26px !important;
+}
+
 input[type=checkbox] {
   /* Double-sized Checkboxes */
   -ms-transform: scale(2); /* IE */
@@ -559,8 +563,8 @@ h2 {font-size: 35px; font-weight: bold;  }
 .well {
     background-color: #888888;
     border: 3px double #AAAAAA;
-    padding-bottom: 11px;
-    padding-top: 11px;
+    padding-bottom: 5px;
+    padding-top: 5px;
 }
 
 

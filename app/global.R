@@ -28,5 +28,7 @@ library(geosphere)
 
 library(shinyjs)
 
+library(rgdal)
+
 # -----------------------------
 

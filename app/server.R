@@ -3,10 +3,18 @@
 # -----------------------------
 
 load("data/allTornadoes_Final.RData")
+stateFips <- read.csv(file = "data/US_FIPS_Codes.csv", header = TRUE)
 
 allStatesLatLng <- read.csv(file = "data/all_states_lat_lng.csv", header = TRUE)
 
 stateBounds <- read.csv(file = "data/state_Bounds.csv", header = TRUE)
+
+counties <- readOGR("data/shpf/cb_2017_us_county_20m.shp", layer = "cb_2017_us_county_20m", stringsAsFactors = FALSE)
+
+# Get Illinois counties only:
+#illinoisCounties <- subset(counties, counties$STATEFP == 17)
+#illinoisCountyData <- allTornadoes %>% filter(f1 %in% illinoisCounties$COUNTYFP | f2 %in% illinoisCounties$COUNTYFP | f3 %in% illinoisCounties$COUNTYFP | f4 %in% illinoisCounties$COUNTYFP)
+
 
 # -----------------------------
 server <- function(input, output) {
@@ -56,6 +64,12 @@ server <- function(input, output) {
   getLossLower <- reactive({(input$loss_dSlider[1] * 1000000)})
   getLossUpper <- reactive({(input$loss_dSlider[2] * 1000000)})
   
+  # Get county option for maps
+  getCountyOption <- reactive({input$counties_Select})
+  
+  # Get map layers
+  getMapLayers <- reactive({input$mapLayers_Input})
+  
   
 
   output$logText <- renderPrint({
@@ -79,6 +93,10 @@ server <- function(input, output) {
     #toggle("extraCharts", anim = TRUE, time = 1, animType = "fade")  # toggle is a shinyjs function
     toggle("extraCharts")  # toggle is a shinyjs function
   })
+  
+  # -----------------------------
+  
+
   
   # -----------------------------
   # Leaflet
@@ -246,7 +264,14 @@ server <- function(input, output) {
       setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
       setMaxBounds(rightB, bottomB, leftB, topB) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
-                       options = providerTileOptions(noWrap = TRUE)) #%>% addMeasure()
+                       options = providerTileOptions(noWrap = TRUE)) %>% hideGroup("Counties")
+    
+    
+    
+    #%>% addMeasure()
+    
+    
+    
   })
   
   # Incremental changes to the map should be performed in
@@ -276,7 +301,39 @@ server <- function(input, output) {
     runjs(paste("var el = document.getElementById(\"c9_state1_map\"); var map = $(el).data(\"leaflet-map\"); map.setZoom(", zLevel,")"))
   })
   
-  observe({ # track data,
+  observe({ # track data, counties
+    
+    # -----------
+    # counties
+    countyData <- getCountyData()
+    
+    maxCount <- max(countyData$Count, na.rm = TRUE)
+    
+    if (maxCount <= 100)
+      bins <- c(0, 1, 2, 5, 10, 20, 50, 100, Inf)
+    else if (maxCount <= 1000)
+      bins <- c(0, 10, 20, 50, 100, 200, 500, 1000, Inf)
+    else
+      bins <- c(0, maxCount * 0.01, maxCount * 0.02, maxCount * 0.05, maxCount * 0.1, maxCount * 0.2, maxCount * 0.5, maxCount * 0.7, maxCount)
+    
+    pal <- colorBin("YlOrRd", domain = countyData$Count, bins = bins, na.color = "AAAAAA")
+    
+    if (maxCount > 1000000)
+    {
+      popupData <- paste0("<strong>County: </strong>", 
+                          countyData$NAME, 
+                          "<br><strong>Count: </strong>", 
+                          countyData$Count)
+    }
+    else
+    {
+      popupData <- paste0("<strong>County: </strong>", 
+                          countyData$NAME, 
+                          "<br><strong>Count: </strong>", 
+                          countyData$Count)
+    }
+    
+    # -----------
     
     mapData = state1_map_track_data()
     mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
@@ -307,6 +364,26 @@ server <- function(input, output) {
     # active state outline and fill
     proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.1, fillColor = "black")
     
+    # -----------
+    # counties
+    
+    proxy %>% addPolygons(data = countyData,
+                          fillColor = ~pal(Count), 
+                          fillOpacity = 0.8, 
+                          color = "#BDBDC3", 
+                          weight = 1,
+                          popup = popupData,
+                          highlightOptions = highlightOptions(color = "black", weight = 4, bringToFront = FALSE),
+                          group = "Counties")
+    
+    #proxy %>% hideGroup("Counties")
+    
+    # -----------
+    
+    
+    
+    
+    #
     if (length(lat_start) > 0) {
     for(i in 1:length(lat_start)){
       
@@ -314,7 +391,7 @@ server <- function(input, output) {
         
           proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
                                        lng = c(lon_start[i],lon_end[i]),
-                                weight = 30, opacity = 0.35, color = "#FF0000")
+                                weight = 30, opacity = 0.35, color = "#0000FF", group = "Tracks")
       }
     }
     }
@@ -325,23 +402,57 @@ server <- function(input, output) {
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
         weight = 5, fillOpacity = 0.0, radius = 2500,
-        color = "#FF0000",
+        color = "#0000FF",
         label = paste("Start"),
         labelOptions = labelOptions(style = list(
           "padding" = "10px",
           "font-size" = "35px"
-      ))) %>%
+      )), group = "Tracks") %>%
       # end
       addCircles(
       lng = ~mapData@data$elon,
       lat = ~mapData@data$elat,
       weight = 5, fillOpacity = 0.7, radius = 4000,
-      color = "#FF0000",
+      color = "#0000FF",
       label = paste("End"),
       labelOptions = labelOptions(style = list(
         "padding" = "10px",
         "font-size" = "35px"
-      )))
+      )), group = "Tracks")
+    
+  })
+  
+  observe({ # handle map layers
+    
+    layers <- getMapLayers()
+    
+    proxy <- leafletProxy("c9_state1_map")
+    
+    #for(i in 1:length(layers)){
+    #  map %>% hideGroup(i)
+    #}
+    
+    if ("Counties" %in% layers)
+      proxy %>% showGroup("Counties")
+    else
+      proxy %>% hideGroup("Counties")
+    
+    if ("Tracks" %in% layers)
+      proxy %>% showGroup("Tracks")
+    else
+      proxy %>% hideGroup("Tracks")
+    
+    
+    if ("Counties" %in% layers && "Tracks" %in% layers){
+      
+      proxy %>% hideGroup("Counties")
+      proxy %>% hideGroup("Tracks")
+      
+      proxy %>% showGroup("Counties")
+      proxy %>% showGroup("Tracks")
+    }
+
+    
     
   })
   
@@ -405,10 +516,84 @@ server <- function(input, output) {
     allStatesLatLng %>% filter(Code == state) %>% dplyr::select(Longitude) 
   }
   
-  getMaxDistanceBetweenStates <- function(dist, state2)
+  #illinoisCounties <- subset(counties, counties$STATEFP == 17)
+  #illinoisCountyData <- allTornadoes %>% filter(f1 %in% illinoisCounties$COUNTYFP | f2 %in% illinoisCounties$COUNTYFP | f3 %in% illinoisCounties$COUNTYFP | f4 %in% illinoisCounties$COUNTYFP)
+  
+  
+  getCountyData <- function(dataType)
   {
+    dataType <- getCountyOption()
+    magnitudes <- getMagnitudes()
     
+    stateCode <- filter(stateFips, stateFips$State == substr(input$state1_select, 6, stop = 1000))
+    
+    
+
+    stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
+    
+    stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
+    stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+
+
+    # MAYBE TODO
+    magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
+
+    if (dataType == "Tornadoes")
+    {
+      countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
+    }
+    else if (dataType ==  "Fatalities")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(fat))
+    }
+    else if (dataType == "Injuries")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
+    }
+    else if (dataType == "Loss")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
+    }
+
+    countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
+
+    return(countyData)
   }
+  
+  # getCountyData <- function(dataType)
+  # {
+  #   dataType <- getCountyOption()
+  #   
+  #   magnitudes <- getMagnitudes()
+  #   
+  #   illinoisCounties <- subset(counties, counties$STATEFP == getState1())
+  #   illinoisCountyData <- allTornadoes %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+  #   
+  #   
+  #   # MAYBE TODO
+  #   magIllinoisCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
+  #   
+  #   if (dataType == "Tornadoes")
+  #   {
+  #     countyData <- magIllinoisCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
+  #   }
+  #   else if (dataType ==  "Fatalities")
+  #   {
+  #     countyData <- magIllinoisCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(fat))
+  #   }
+  #   else if (dataType == "Injuries")
+  #   {
+  #     countyData <- magIllinoisCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
+  #   }
+  #   else if (dataType == "Loss")
+  #   {
+  #     countyData <- magIllinoisCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss))
+  #   }
+  #   
+  #   countyData <- sp::merge(illinoisCounties, countyData, by = c("COUNTYFP"))
+  #   
+  #   return(countyData)
+  # }
   
   # Data
   c1Data <- function(state)
@@ -455,9 +640,9 @@ server <- function(input, output) {
       hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
       
       c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Magnitude = mag) %>% 
-        summarise(Count = n()) %>% 
-        mutate(Percent = (Count / sum(Count) * 100))
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Magnitude = mag) %>% 
+        dplyr::summarise(Count = n()) %>% 
+        dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
       c3$Hour <- ordered(c3$Hour, levels = hours24[,])
     }
@@ -466,9 +651,9 @@ server <- function(input, output) {
       hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
       
       c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Magnitude = mag) %>% 
-        summarise(Count = n()) %>% 
-        mutate(Percent = (Count / sum(Count) * 100))
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Magnitude = mag) %>% 
+        dplyr::summarise(Count = n()) %>% 
+        dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
       c3$Hour <- ordered(c3$Hour, levels = hours12[,])
     }
@@ -515,6 +700,12 @@ server <- function(input, output) {
     
     return(c4)
   }
+  
+  comprss <- function(tx) { 
+    div <- findInterval(as.numeric(gsub("\\,", "", tx)), 
+                        c(1, 1e3, 1e6, 1e9, 1e12) )
+    paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 2), 
+          c("","K","M","B","T")[div] )}
   
   #State 1
   
@@ -597,7 +788,7 @@ server <- function(input, output) {
       ordering = T,
       lengthChange = FALSE),
       rownames = FALSE
-    )
+    ) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
   })
   
   output$c2_state1_table <- renderDT({
@@ -719,7 +910,7 @@ server <- function(input, output) {
       ordering = T,
       lengthChange = FALSE),
       rownames = FALSE
-    )
+    ) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
   })
   
   output$c2_state2_table <- renderDT({
