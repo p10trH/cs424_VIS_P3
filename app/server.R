@@ -831,6 +831,66 @@ server <- function(input, output, session) {
     return(c4)
   }
   
+  #C% | Table and chart showing the injuries, fatalities, loss for each year in the records
+  c5Data <- function(state)
+  {
+    c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Injury = inj, Fatality = fat, Year = yr) %>% 
+      summarise(Count = n()) %>%   
+      mutate(Percent = (Count / sum(Count) * 100))
+    
+    c5$Percent <- format(round(c5$Percent, 2), nsmall = 2)
+    c5$Percent <- paste0(c5$Percent, "%")
+    
+    c5 <- dplyr::arrange(c5, Injury, Fatality)
+    
+    return(c5)
+  }
+  
+  #Clean up C5 table, too many columns looked bad
+  c5DataTable <- function(state)
+  {
+    c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Injury = inj, Fatality = fat, Year = yr) %>% 
+      summarise(Count = n())
+
+    c5 <- dplyr::arrange(c5, Injury, Fatality)
+    
+    return(c5)
+  }
+  
+  #C6 | Table and chart showing the injuries, fatalities, loss per month summed over all years
+  c6Data <- function(state)
+  {
+    c6 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Month = mo, Injury = inj, Fatality = fat) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+      
+      c6$Percent <- format(round(c6$Percent, 2), nsmall = 2)
+      c6$Percent <- paste0(c6$Percent, "%")
+      
+      c6 <- dplyr::arrange(c6, Month, Injury, Fatality)
+
+      return(c6)
+  }
+  
+  #Table and chart showing the injuries, fatalities, loss per hour of the day summed over all years
+  c7Data <- function(state)
+  {
+    c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      
+      return(c7)
+  }
+  
+  #Table and chart showing which counties were most hit by tornadoes summed over all years
+  c8Data <- function(state)
+  {
+    c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      
+      return(c8)
+  }
+  
   comprss <- function(tx) { 
     div <- findInterval(as.numeric(gsub("\\,", "", tx)), 
                         c(1, 1e3, 1e6, 1e9, 1e12) )
@@ -1096,6 +1156,101 @@ server <- function(input, output, session) {
       lengthChange = FALSE),
       rownames = FALSE
     )
+  })
+  
+  #C5 Chart Output | State 1 & 2
+  output$c5_state1 <- renderPlotly({
+    
+    c5 <- c5Data(getState1())
+    
+    ggplotly(ggplot(c5, aes(x = Year, 
+                            y = Injury, 
+                            group = "Injury", 
+                            text = paste0("Injury: ", Injury))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c5_state2 <- renderPlotly({
+    
+    c5 <- c5Data(getState2())
+    
+    ggplotly(ggplot(c5, aes(x = Year, 
+                            y = Injury, 
+                            group = "Injury", 
+                            text = paste0("Injury: ", Count, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  #C5 Table Output | State 1 & 2
+  output$c5_state1_table <- renderDT({
+    c5 <- c5DataTable(getState1())
+
+    datatable(c5, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c5_state2_table <- renderDT({
+    c5 <- c5DataTable(getState2())
+    
+    datatable(c5, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  #c6 Chart Output | State 1 & 2
+  output$c6_state1 <- renderPlotly({
+    
+    c6 <- c6Data(getState1())
+    
+    ggplotly(ggplot(c6, aes(x = Month, 
+                            y = Injury, 
+                            group = "Injury", 
+                            text = paste0("Injuries: ", Injury))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c6_state2 <- renderPlotly({
+    
+    c6 <- c6Data(getState2())
+    
+    ggplotly(ggplot(c6, aes(x = Month, 
+                            y = Injury, 
+                            group = "Injury", 
+                            text = paste0("Injuries: ", Injury, " (", Percent, ")"))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
   })
   
   # -----------------------------
