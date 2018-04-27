@@ -831,7 +831,7 @@ server <- function(input, output, session) {
     return(c4)
   }
   
-  #C% | Table and chart showing the injuries, fatalities, loss for each year in the records
+  #C5 | Table and chart showing the injuries, fatalities, loss for each year in the records
   c5Data <- function(state)
   {
     c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
