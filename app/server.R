@@ -894,9 +894,7 @@ server <- function(input, output, session) {
     c7$Percent <- format(round(c7$Percent, 2), nsmall = 2)
     c7$Percent <- paste0(c7$Percent, "%")
     
-    c7 <- dplyr::arrange(c7, Hour, -Magnitude)
-    
-    c7$Magnitude <- factor(c7$Magnitude)
+    c7 <- dplyr::arrange(c7, Hour, Injury, Fatality)
     
     return(c7)
   }
@@ -1297,6 +1295,37 @@ server <- function(input, output, session) {
     c6$Count   <- NULL
     
     datatable(c6, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  #C7 Table Output | State 1 & 2
+  output$c7_state1_table <- renderDT({
+    c7 <- c7Data(getState1())
+    c7$Percent <- NULL
+    c7$Count   <- NULL
+    
+    datatable(c7, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c7_state2_table <- renderDT({
+    c7 <- c7Data(getState2())
+    c7$Percent <- NULL
+    c7$Count   <- NULL
+    
+    datatable(c7, options = list(
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
