@@ -77,7 +77,7 @@ server <- function(input, output, session) {
   getMapProvider <- reactive({input$mapProvider_Input})
   
   
-
+  
   output$logText <- renderPrint({
     print("Year as Num:")
     print(getYearAsNum())
@@ -121,7 +121,7 @@ server <- function(input, output, session) {
     } else
       runjs("var ele = document.getElementById(\"hide\"); ele.style.opacity = \"1.0\";")
   })
-
+  
   
   # -----------------------------
   # Leaflet
@@ -131,7 +131,7 @@ server <- function(input, output, session) {
   
   # -----------------------------
   # Input Controls
-
+  
   output$width_dSlider <- renderUI({ # width
     
     selYear <- getYearAsNum()
@@ -143,7 +143,7 @@ server <- function(input, output, session) {
       mapData1 <- filter(allTornadoes, st == getState1())
       mapData2 <- filter(allTornadoes, st == getState2())
     }
-
+    
     maxState1 <- max(mapData1$wid, na.rm = TRUE)
     minState1 <- min(mapData1$wid, na.rm = TRUE)
     
@@ -186,8 +186,8 @@ server <- function(input, output, session) {
     selYear <- getYearAsNum()
     
     if (getYearCurrOrAll() == 0) {
-     mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
-     mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+      mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+      mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
     } else {
       mapData1 <- filter(allTornadoes, st == getState1())
       mapData2 <- filter(allTornadoes, st == getState2())
@@ -324,7 +324,8 @@ server <- function(input, output, session) {
     
     # set view and max Bounds
     proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>% 
-              setMaxBounds(rightB, bottomB, leftB, topB)
+      setMaxBounds(rightB, bottomB, leftB, topB)
+    
   })
   
   observe({ # sync zoom
@@ -339,13 +340,14 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("c9_state1_map")
     
     proxy %>% addProviderTiles(getMapProvider(),
-                     options = providerTileOptions(noWrap = TRUE))
+                               options = providerTileOptions(noWrap = TRUE))
     
     
   })
   
   observe({ # track data, counties
     
+    message("-----OBSERVE 1 START-----")
     # track
     mapData = state1_map_track_data()
     
@@ -379,9 +381,10 @@ server <- function(input, output, session) {
     
     stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
     
-    
     # MAYBE TODO
     magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
+    
+    
     
     if (dataType == "Tornadoes (magnitude)")
     {
@@ -400,9 +403,123 @@ server <- function(input, output, session) {
       countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
     }
     
+    message("-----OBSERVE 1 BP 1-----")
+    if (nrow(countyData) == 0)
+    {
+      activeState <- subset(states, STUSPS == getState1())
+      
+      
+      lat_start <- mapData@data$slat
+      lat_end <- mapData@data$elat
+      
+      lon_start <- mapData@data$slon
+      lon_end <- mapData@data$elon
+      
+      #state <- toString(mapData@data$STUSPS[1])
+      
+      # get map and clear shapes
+      proxy <- leafletProxy("c9_state1_map", data = mapData) %>% clearShapes()
+      
+      # outline of all states
+      proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.0, fillColor = "black")
+      
+      # active state outline and fill
+      proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.1, fillColor = "black")
+      
+      
+      
+      # -----------
+      # counties
+      
+      
+      #proxy %>% hideGroup("Counties")
+      
+      # -----------
+      
+      
+      
+      
+      # 
+      if (length(lat_start) > 0 && !is.na(lat_start)) {
+        for(i in 1:length(lat_start)){
+          
+          if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+            
+            proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
+                                  lng = c(lon_start[i],lon_end[i]),
+                                  weight = 30, opacity = 0.55, color = "#8a49bc", group = "Tracks",
+                                  label = paste("TRACK"),
+                                  labelOptions = labelOptions(style = list(
+                                    "padding" = "10px",
+                                    "font-size" = "30px"
+                                  ))
+            )
+          }
+        }
+      }
+      
+      proxy %>%
+        # start
+        addCircles(
+          lng = ~mapData@data$slon,
+          lat = ~mapData@data$slat,
+          weight = 10, fillOpacity = 0.0, radius = 2500, opacity = .95,
+          color = "#8a49bc",
+          popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                         "<br><strong>Time: </strong></b>", mapData@data$time,
+                         "<br></b>",
+                         "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                         "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                         "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                         "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                         "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                         "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+          ),
+          popupOptions = popupOptions(style = list(
+            "width" = "300px",
+            "padding" = "10px",
+            "font-size" = "30px"
+          )),
+          label = paste("START"),
+          labelOptions = labelOptions(style = list(
+            "padding" = "10px",
+            "font-size" = "30px"
+          )), group = "Tracks") %>%
+        # end
+        addCircles(
+          lng = ~mapData@data$elon,
+          lat = ~mapData@data$elat,
+          weight = 10, fillOpacity = 0.7, radius = 4000, opacity = .95,
+          color = "#8a49bc",
+          popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                         "<br><strong>Time: </strong></b>", mapData@data$time,
+                         "<br></b>",
+                         "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                         "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                         "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                         "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                         "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                         "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+          ),
+          popupOptions = popupOptions(style = list(
+            "width" = "300px",
+            "padding" = "10px",
+            "font-size" = "30px"
+          )),
+          label = paste("END"),
+          labelOptions = labelOptions(style = list(
+            "padding" = "10px",
+            "font-size" = "30px"
+          )), group = "Tracks")
+      
+      
+      message("-----OBSERVE 1 END-----")
+      return()
+    }
+    
     countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
     
-    
+    message("-----OBSERVE 1 BP 2-----")
     
     
     maxCount <- max(countyData$Count, na.rm = TRUE)
@@ -415,6 +532,8 @@ server <- function(input, output, session) {
       bins <- c(0, maxCount * 0.01, maxCount * 0.02, maxCount * 0.05, maxCount * 0.1, maxCount * 0.2, maxCount * 0.5, maxCount * 0.7, maxCount)
     
     pal <- colorBin("YlOrRd", domain = countyData$Count, bins = bins, na.color = "AAAAAA")
+    
+    message("-----OBSERVE 1 BP 3-----")
     
     if (maxCount > 1000000)
     {
@@ -431,13 +550,15 @@ server <- function(input, output, session) {
                           countyData$Count)
     }
     
+    message("-----OBSERVE 1 BP LAST-----")
+    
     # -----------
     
     
     #mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     
     activeState <- subset(states, STUSPS == getState1())
-
+    
     
     lat_start <- mapData@data$slat
     lat_end <- mapData@data$elat
@@ -455,6 +576,8 @@ server <- function(input, output, session) {
     
     # active state outline and fill
     proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.1, fillColor = "black")
+    
+    
     
     # -----------
     # counties
@@ -475,23 +598,23 @@ server <- function(input, output, session) {
     
     
     
-    #
-    if (length(lat_start) > 0) {
-    for(i in 1:length(lat_start)){
-      
-      if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+    # 
+    if (length(lat_start) > 0 && !is.na(lat_start)) {
+      for(i in 1:length(lat_start)){
         
+        if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+          
           proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
-                                       lng = c(lon_start[i],lon_end[i]),
+                                lng = c(lon_start[i],lon_end[i]),
                                 weight = 30, opacity = 0.55, color = "#8a49bc", group = "Tracks",
                                 label = paste("TRACK"),
                                 labelOptions = labelOptions(style = list(
                                   "padding" = "10px",
                                   "font-size" = "30px"
                                 ))
-                                )
+          )
+        }
       }
-    }
     }
     
     proxy %>%
@@ -510,7 +633,7 @@ server <- function(input, output, session) {
                        "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
                        "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
                        "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
-                       ),
+        ),
         popupOptions = popupOptions(style = list(
           "width" = "300px",
           "padding" = "10px",
@@ -520,37 +643,41 @@ server <- function(input, output, session) {
         labelOptions = labelOptions(style = list(
           "padding" = "10px",
           "font-size" = "30px"
-      )), group = "Tracks") %>%
+        )), group = "Tracks") %>%
       # end
       addCircles(
-      lng = ~mapData@data$elon,
-      lat = ~mapData@data$elat,
-      weight = 10, fillOpacity = 0.7, radius = 4000, opacity = .95,
-      color = "#8a49bc",
-      popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
-                     "<br><strong>Time: </strong></b>", mapData@data$time,
-                     "<br></b>",
-                     "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
-                     "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
-                     "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
-                     "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
-                     "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
-                     "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
-      ),
-      popupOptions = popupOptions(style = list(
-        "width" = "300px",
-        "padding" = "10px",
-        "font-size" = "30px"
-      )),
-      label = paste("END"),
-      labelOptions = labelOptions(style = list(
-        "padding" = "10px",
-        "font-size" = "30px"
-      )), group = "Tracks")
+        lng = ~mapData@data$elon,
+        lat = ~mapData@data$elat,
+        weight = 10, fillOpacity = 0.7, radius = 4000, opacity = .95,
+        color = "#8a49bc",
+        popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                       "<br><strong>Time: </strong></b>", mapData@data$time,
+                       "<br></b>",
+                       "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                       "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                       "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                       "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                       "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                       "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+        ),
+        popupOptions = popupOptions(style = list(
+          "width" = "300px",
+          "padding" = "10px",
+          "font-size" = "30px"
+        )),
+        label = paste("END"),
+        labelOptions = labelOptions(style = list(
+          "padding" = "10px",
+          "font-size" = "30px"
+        )), group = "Tracks")
     
+    
+    message("-----OBSERVE 1 END-----")
   })
   
   observe({ # handle map layers
+    
+    message("-------OBSERVE 2 START-------")
     
     layers <- getMapLayers()
     
@@ -579,9 +706,8 @@ server <- function(input, output, session) {
       proxy %>% showGroup("Counties")
       proxy %>% showGroup("Tracks")
     }
-
     
-    
+    message("-------OBSERVE 2 END-------")
   })
   
   #outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE) # causes errors in console? don't use?
@@ -647,7 +773,12 @@ server <- function(input, output, session) {
   
   #illinoisCounties <- subset(counties, counties$STATEFP == 17)
   #illinoisCountyData <- allTornadoes %>% filter(f1 %in% illinoisCounties$COUNTYFP | f2 %in% illinoisCounties$COUNTYFP | f3 %in% illinoisCounties$COUNTYFP | f4 %in% illinoisCounties$COUNTYFP)
-  
+  getMostDestructiveTornadoes <- function()
+  {
+    topTornadoes <- dplyr::arrange(allTornadoes, desc(allTornadoes$destructionScore)) %>% top_n(10)
+    
+    return(topTornadoes)
+  }
   
   getCountyData <- function()
   {
@@ -657,17 +788,17 @@ server <- function(input, output, session) {
     stateCode <- filter(stateFips, stateFips$State == substr(input$state1_select, 6, stop = 1000))
     
     
-
+    
     stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
     
     stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
     
     stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
-
-
+    
+    
     # MAYBE TODO
     magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
-
+    
     if (dataType == "Tornadoes (magnitude)")
     {
       countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
@@ -684,9 +815,9 @@ server <- function(input, output, session) {
     {
       countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
     }
-
+    
     countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
-
+    
     return(countyData)
   }
   
@@ -787,7 +918,7 @@ server <- function(input, output, session) {
       
       c3$Hour <- ordered(c3$Hour, levels = hours12[,])
     }
-
+    
     
     c3$Percent <- format(round(c3$Percent, 2), nsmall = 2)
     c3$Percent <- paste0(c3$Percent, "%")
@@ -829,6 +960,80 @@ server <- function(input, output, session) {
     c4$Magnitude <- factor(c4$Magnitude)
     
     return(c4)
+  }
+  
+  c5Data <- function(state)
+  {
+    c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Year = yr) %>%
+      summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated))
+    
+    c5$Loss <- c5$Loss / 1000000
+    
+    #c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
+    #  group_by( Year = yr, Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
+    #  summarise(Count = n())
+    
+    #c5$Percent <- format(round(c5$Percent, 2), nsmall = 2)
+    #c5$Percent <- paste0(c5$Percent, "%")
+    #Clean up currency - TODO
+    #c5$Loss   <- currency(c5$Loss, digits = 0L)
+    #c5$Loss   <- paste0('$',formatC(c5$Loss, big.mark=',', format = 'fg'))
+    #c5$Loss   <- paste0('$', c5$Loss)
+    
+    #c5 <- dplyr::arrange(c5, Injury, Fatality, Loss)
+    
+    return(c5)
+  }
+  
+  #C6 | Table and chart showing the injuries, fatalities, loss per month summed over all years
+  c6Data <- function(state)
+  {
+    c6 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(Month = mo) %>%
+      summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated))
+    
+    c6$Loss <- c6$Loss / 1000000
+    
+    # c6 <- allTornadoes %>% dplyr::filter(st == state) %>%
+    #  group_by(Month = mo, Injury = inj, Fatality = fat, Loss = loss_updated) %>%
+    #  summarise(Count = n()) %>%
+    #  mutate(Percent = (Count / sum(Count) * 100))
+    
+    #c6$Percent <- format(round(c6$Percent, 2), nsmall = 2)
+    #c6$Percent <- paste0(c6$Percent, "%")
+    
+    return(c6)
+  }
+  
+  #C7 | Table and chart showing the injuries, fatalities, loss per hour of the day summed over all years
+  c7Data <- function(state)
+  {
+    #Check for 12 or 24 hour time format
+    if (getHourFormat())
+    {
+      hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
+      
+      c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00")) %>% 
+        dplyr::summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated)) 
+      
+      c7$Hour <- ordered(c7$Hour, levels = hours24[,])
+    }
+    else
+    {
+      hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
+      
+      c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p")) %>% 
+        dplyr::summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated)) 
+      
+      c7$Hour <- ordered(c7$Hour, levels = hours12[,])
+    }
+    
+    c7$Loss <- c7$Loss / 1000000
+    
+    return(c7)
   }
   
   comprss <- function(tx) { 
@@ -919,12 +1124,16 @@ server <- function(input, output, session) {
   output$c1_state1_table <- renderDT({
     c1 <- c1Data(getState1())
     
-    datatable(c1, options = list(
+    datatable(c1, extensions = 'Scroller', options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     ) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
   })
@@ -932,12 +1141,16 @@ server <- function(input, output, session) {
   output$c2_state1_table <- renderDT({
     c2 <- c2Data(getState1())
     
-    datatable(c2, options = list(
+    datatable(c2, extensions = 'Scroller', options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     )
   })
@@ -945,12 +1158,16 @@ server <- function(input, output, session) {
   output$c3_state1_table <- renderDT({
     c3 <- c3Data(getState1())
     
-    datatable(c3, options = list(
+    datatable(c3, extensions = 'Scroller', options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     )
   })
@@ -958,12 +1175,16 @@ server <- function(input, output, session) {
   output$c4_state1_table <- renderDT({
     c4 <- c4Data(getState1())
     
-    datatable(c4, options = list(
+    datatable(c4, extensions = 'Scroller', options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     )
   })
@@ -1049,12 +1270,16 @@ server <- function(input, output, session) {
   output$c1_state2_table <- renderDT({
     c1 <- c1Data(getState2())
     
-    datatable(c1, options = list(
+    datatable(c1, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     ) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
   })
@@ -1062,12 +1287,16 @@ server <- function(input, output, session) {
   output$c2_state2_table <- renderDT({
     c2 <- c2Data(getState2())
     
-    datatable(c2, options = list(
+    datatable(c2, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     )
   })
@@ -1075,12 +1304,16 @@ server <- function(input, output, session) {
   output$c3_state2_table <- renderDT({
     c3 <- c3Data(getState2())
     
-    datatable(c3, options = list(
+    datatable(c3, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
-      lengthChange = FALSE),
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
       rownames = FALSE
     )
   })
@@ -1088,14 +1321,234 @@ server <- function(input, output, session) {
   output$c4_state2_table <- renderDT({
     c4 <- c4Data(getState2())
     
-    datatable(c4, options = list(
+    datatable(c4, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE
+    )
+  })
+  
+  output$b4_table <- renderDT({
+    b4 <- getMostDestructiveTornadoes()
+    
+    datatable(b4, options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
       dom = "tp",
       ordering = T,
       lengthChange = FALSE),
-      rownames = FALSE
-    )
+      rownames = FALSE)
+  })
+  
+  #C5 Chart Output | State 1 & 2
+  output$c5_state1 <- renderPlotly({
+    
+    c5 <- c5Data(getState1())
+    
+    c5 <- reshape2::melt(c5, id.vars = "Year")
+    
+    ggplotly(ggplot(c5, aes(x = Year, 
+                            y = value, 
+                            fill = variable,
+                            text = paste0(variable, ": ", value))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c5_state2 <- renderPlotly({
+    
+    c5 <- c5Data(getState2())
+    
+    c5 <- reshape2::melt(c5, id.vars = "Year")
+    
+    ggplotly(ggplot(c5, aes(x = Year, 
+                            y = value, 
+                            fill = variable,
+                            text = paste0(variable, ": ", value))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  #C5 Table Output | State 1 & 2
+  output$c5_state1_table <- renderDT({
+    c5 <- c5Data(getState1())
+    
+    datatable(c5, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
+  })
+  
+  output$c5_state2_table <- renderDT({
+    c5 <- c5Data(getState2())
+    
+    datatable(c5, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
+  })
+  
+  #c6 Chart Output | State 1 & 2
+  output$c6_state1 <- renderPlotly({
+    
+    c6 <- c6Data(getState1())
+    c6 <- reshape2::melt(c6, id.vars = "Month")
+    
+    ggplotly(ggplot(c6, aes(x = Month, 
+                            y = value, 
+                            fill = variable,
+                            text = paste0(variable, ": ", value))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c6_state2 <- renderPlotly({
+    
+    c6 <- c6Data(getState2())
+    c6 <- reshape2::melt(c6, id.vars = "Month")
+    
+    ggplotly(ggplot(c6, aes(x = Month, 
+                            y = value, 
+                            fill = variable,
+                            text = paste0(variable, ": ", value))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  #C6 Table Output | State 1 & 2
+  output$c6_state1_table <- renderDT({
+    c6 <- c6Data(getState1())
+    
+    datatable(c6, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE)
+  })
+  
+  output$c6_state2_table <- renderDT({
+    c6 <- c6Data(getState2())
+    
+    datatable(c6, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE)
+  })
+  
+  #C7 Table Output | State 1 & 2
+  output$c7_state1_table <- renderDT({
+    c7 <- c7Data(getState1())
+    
+    datatable(c7, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE)
+  })
+  
+  output$c7_state2_table <- renderDT({
+    c7 <- c7Data(getState2())
+    
+    datatable(c7, extensions = "Scroller", options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE,
+      deferRender = TRUE,
+      scrollY = 800,
+      scroller = TRUE),
+      rownames = FALSE)
+  })
+  
+  output$c7_state1 <- renderPlotly({
+    c7 <- c7Data(getState1())
+    c7 <- reshape2::melt(c7, id.vars = "Hour")
+    
+    ggplotly(ggplot(c7, aes(x = Hour, 
+                            y = value, 
+                            fill = variable,
+                            text = paste0(variable, ": ", value))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  output$c7_state2 <- renderPlotly({
+    c7 <- c7Data(getState2())
+    c7 <- reshape2::melt(c7, id.vars = "Hour")
+    
+    ggplotly(ggplot(c7, aes(x = Hour, 
+                            y = value, 
+                            fill = variable,
+                            text = paste0(variable, ": ", value))) + 
+               geom_bar(stat = "identity") + 
+               plotTheme + 
+               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))
   })
   
   # -----------------------------
@@ -1105,7 +1558,7 @@ server <- function(input, output, session) {
   
   
   
- 
+  
 }
 
 
