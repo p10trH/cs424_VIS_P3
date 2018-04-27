@@ -1253,6 +1253,37 @@ server <- function(input, output, session) {
       layout(xaxis = list(fixedrange = TRUE))
   })
   
+  #C6 Table Output | State 1 & 2
+  output$c6_state1_table <- renderDT({
+    c6 <- c6Data(getState1())
+    c6$Percent <- NULL
+    c6$Count   <- NULL
+    
+    datatable(c6, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c6_state2_table <- renderDT({
+    c6 <- c6Data(getState2())
+    c6$Percent <- NULL
+    c6$Count   <- NULL
+    
+    datatable(c6, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+
   # -----------------------------
   
   
