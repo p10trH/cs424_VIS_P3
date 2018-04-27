@@ -835,14 +835,17 @@ server <- function(input, output, session) {
   c5Data <- function(state)
   {
     c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(Injury = inj, Fatality = fat, Year = yr) %>% 
+      group_by(Injury = inj, Fatality = fat, Year = yr, Loss = loss_updated) %>% 
       summarise(Count = n()) %>%   
       mutate(Percent = (Count / sum(Count) * 100))
     
     c5$Percent <- format(round(c5$Percent, 2), nsmall = 2)
     c5$Percent <- paste0(c5$Percent, "%")
+    #c5$Loss   <- currency(c5$Loss, digits = 0L)
+    #c5$Loss   <- paste0('$',formatC(c5$Loss, big.mark=',', format = 'fg'))
+    #c5$Loss   <- paste0('$', c5$Loss)
     
-    c5 <- dplyr::arrange(c5, Injury, Fatality)
+    c5 <- dplyr::arrange(c5, Injury, Fatality, Loss)
     
     return(c5)
   }
@@ -851,14 +854,14 @@ server <- function(input, output, session) {
   c6Data <- function(state)
   {
     c6 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(Month = mo, Injury = inj, Fatality = fat) %>% 
+      group_by(Month = mo, Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
       summarise(Count = n()) %>% 
       mutate(Percent = (Count / sum(Count) * 100))
       
       c6$Percent <- format(round(c6$Percent, 2), nsmall = 2)
       c6$Percent <- paste0(c6$Percent, "%")
       
-      c6 <- dplyr::arrange(c6, Month, Injury, Fatality)
+      c6 <- dplyr::arrange(c6, Month, Injury, Fatality, Loss)
 
       return(c6)
   }
@@ -872,7 +875,7 @@ server <- function(input, output, session) {
       hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
       
       c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Injury = inj, Fatality = fat) %>% 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
         dplyr::summarise(Count = n()) %>% 
         dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
@@ -883,18 +886,17 @@ server <- function(input, output, session) {
       hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
       
       c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Injury = inj, Fatality = fat) %>% 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
         dplyr::summarise(Count = n()) %>% 
         dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
       c7$Hour <- ordered(c7$Hour, levels = hours12[,])
     }
     
-    
     c7$Percent <- format(round(c7$Percent, 2), nsmall = 2)
     c7$Percent <- paste0(c7$Percent, "%")
     
-    c7 <- dplyr::arrange(c7, Hour, Injury, Fatality)
+    c7 <- dplyr::arrange(c7, Hour, Injury, Fatality, Loss)
     
     return(c7)
   }
