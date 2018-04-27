@@ -17,7 +17,7 @@ counties <- readOGR("data/shpf/cb_2017_us_county_20m.shp", layer = "cb_2017_us_c
 
 
 # -----------------------------
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   # Get year
   getYearAsNum <- reactive({as.numeric(input$slider_years)})
@@ -70,6 +70,12 @@ server <- function(input, output) {
   # Get map layers
   getMapLayers <- reactive({input$mapLayers_Input})
   
+  # Current or all years in sliders
+  getYearCurrOrAll <- reactive({input$yearsRange_radio})
+  
+  # Get Map Provider
+  getMapProvider <- reactive({input$mapProvider_Input})
+  
   
 
   output$logText <- renderPrint({
@@ -96,6 +102,25 @@ server <- function(input, output) {
   
   # -----------------------------
   
+  observeEvent(input$mainNav, {
+    #toggle("extraCharts", anim = TRUE, time = 1, animType = "fade")  # toggle is a shinyjs function
+    toggle("mapLayers_Panel")  # toggle is a shinyjs function
+    toggle("countiesSelect_Panel")
+    
+    #val <- getYearAsStr()
+    
+    #updateSliderInput(session, inputId = "slider_years", min = 1950, max = 2016, value = 2011, step = 1)
+  })
+  
+  # -----------------------------
+  
+  observeEvent(input$mapLayers_Input, {
+    #toggle("extraCharts", anim = TRUE, time = 1, animType = "fade")  # toggle is a shinyjs function
+    if (!("Counties" %in% input$mapLayers_Input)) {
+      runjs("var ele = document.getElementById(\"hide\"); ele.style.opacity = \"0.2\";")
+    } else
+      runjs("var ele = document.getElementById(\"hide\"); ele.style.opacity = \"1.0\";")
+  })
 
   
   # -----------------------------
@@ -109,13 +134,15 @@ server <- function(input, output) {
 
   output$width_dSlider <- renderUI({ # width
     
-    #selYear <- getYearAsNum()
+    selYear <- getYearAsNum()
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
-    
-    mapData1 <- filter(allTornadoes, st == getState1())
-    mapData2 <- filter(allTornadoes, st == getState2())
+    if (getYearCurrOrAll() == 0) {
+      mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+      mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    } else {
+      mapData1 <- filter(allTornadoes, st == getState1())
+      mapData2 <- filter(allTornadoes, st == getState2())
+    }
 
     maxState1 <- max(mapData1$wid, na.rm = TRUE)
     minState1 <- min(mapData1$wid, na.rm = TRUE)
@@ -134,13 +161,15 @@ server <- function(input, output) {
   
   output$length_dSlider <- renderUI({
     
-    #selYear <- getYearAsNum()
+    selYear <- getYearAsNum()
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
-    
-    mapData1 <- filter(allTornadoes, st == getState1())
-    mapData2 <- filter(allTornadoes, st == getState2())
+    if (getYearCurrOrAll() == 0) {
+      mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+      mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    } else {
+      mapData1 <- filter(allTornadoes, st == getState1())
+      mapData2 <- filter(allTornadoes, st == getState2())
+    }
     
     maxState1 <- max(mapData1$len, na.rm = TRUE)
     minState1 <- min(mapData1$len, na.rm = TRUE)
@@ -154,13 +183,15 @@ server <- function(input, output) {
   
   output$injuries_dSlider <- renderUI({
     
-    #selYear <- getYearAsNum()
+    selYear <- getYearAsNum()
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
-    
-    mapData1 <- filter(allTornadoes, st == getState1())
-    mapData2 <- filter(allTornadoes, st == getState2())
+    if (getYearCurrOrAll() == 0) {
+     mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+     mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    } else {
+      mapData1 <- filter(allTornadoes, st == getState1())
+      mapData2 <- filter(allTornadoes, st == getState2())
+    }
     
     maxState1 <- max(mapData1$inj, na.rm = TRUE)
     minState1 <- min(mapData1$inj, na.rm = TRUE)
@@ -174,13 +205,15 @@ server <- function(input, output) {
   
   output$fatalities_dSlider <- renderUI({
     
-    #selYear <- getYearAsNum()
+    selYear <- getYearAsNum()
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
-    
-    mapData1 <- filter(allTornadoes, st == getState1())
-    mapData2 <- filter(allTornadoes, st == getState2())
+    if (getYearCurrOrAll() == 0) {
+      mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+      mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    } else {
+      mapData1 <- filter(allTornadoes, st == getState1())
+      mapData2 <- filter(allTornadoes, st == getState2())
+    }
     
     maxState1 <- max(mapData1$fat, na.rm = TRUE)
     minState1 <- min(mapData1$fat, na.rm = TRUE)
@@ -194,13 +227,15 @@ server <- function(input, output) {
   
   output$loss_dSlider <- renderUI({
     
-    #selYear <- getYearAsNum()
+    selYear <- getYearAsNum()
     
-    #mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
-    #mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
-    
-    mapData1 <- filter(allTornadoes, st == getState1())
-    mapData2 <- filter(allTornadoes, st == getState2())
+    if (getYearCurrOrAll() == 0) {
+      mapData1 <- filter(allTornadoes, st == getState1(), yr == selYear)
+      mapData2 <- filter(allTornadoes, st == getState2(), yr == selYear)
+    } else {
+      mapData1 <- filter(allTornadoes, st == getState1())
+      mapData2 <- filter(allTornadoes, st == getState2())
+    }
     
     maxState1 <- max(mapData1$loss_updated, na.rm = TRUE)
     minState1 <- min(mapData1$loss_updated, na.rm = TRUE)
@@ -214,9 +249,7 @@ server <- function(input, output) {
   
   # -----------------------------
   
-  # use input$MAPID_bounds and input$MAPID_zoom
-  # set up observers and proxyleaflet
-  
+  # try to filter data elsewhere so no double rendering?
   state1_map_track_data <- reactive({
     
     #selYear <- getYearAsNum()
@@ -301,11 +334,76 @@ server <- function(input, output) {
     runjs(paste("var el = document.getElementById(\"c9_state1_map\"); var map = $(el).data(\"leaflet-map\"); map.setZoom(", zLevel,")"))
   })
   
+  observe({ # map provider
+    
+    proxy <- leafletProxy("c9_state1_map")
+    
+    proxy %>% addProviderTiles(getMapProvider(),
+                     options = providerTileOptions(noWrap = TRUE))
+    
+    
+  })
+  
   observe({ # track data, counties
+    
+    # track
+    mapData = state1_map_track_data()
+    
+    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
+    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
     
     # -----------
     # counties
-    countyData <- getCountyData()
+    #countyData <- getCountyData()
+    
+    
+    dataType <- getCountyOption()
+    magnitudes <- getMagnitudes()
+    
+    stateCode <- filter(stateFips, stateFips$State == substr(input$state1_select, 6, stop = 1000))
+    
+    
+    
+    stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
+    
+    stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
+    
+    stateCountyData <- subset(stateCountyData, wid >= getWidthLower() & wid <= getWidthUpper())
+    stateCountyData <- subset(stateCountyData, len >= getLengthLower() & len <= getLengthUpper())
+    stateCountyData <- subset(stateCountyData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    stateCountyData <- subset(stateCountyData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    stateCountyData <- subset(stateCountyData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
+    
+    stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+    
+    
+    # MAYBE TODO
+    magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
+    
+    if (dataType == "Tornadoes (magnitude)")
+    {
+      countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
+    }
+    else if (dataType ==  "Fatalities")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(fat))
+    }
+    else if (dataType == "Injuries")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
+    }
+    else if (dataType == "Loss")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
+    }
+    
+    countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
+    
+    
+    
     
     maxCount <- max(countyData$Count, na.rm = TRUE)
     
@@ -335,12 +433,6 @@ server <- function(input, output) {
     
     # -----------
     
-    mapData = state1_map_track_data()
-    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
-    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
-    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
-    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
-    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
     
     #mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     
@@ -370,8 +462,8 @@ server <- function(input, output) {
     proxy %>% addPolygons(data = countyData,
                           fillColor = ~pal(Count), 
                           fillOpacity = 0.8, 
-                          color = "#BDBDC3", 
-                          weight = 1,
+                          color = "#333333", 
+                          weight = 2,
                           popup = popupData,
                           highlightOptions = highlightOptions(color = "black", weight = 4, bringToFront = FALSE),
                           group = "Counties")
@@ -391,7 +483,13 @@ server <- function(input, output) {
         
           proxy <- addPolylines(proxy, lat = c(lat_start[i],lat_end[i]),
                                        lng = c(lon_start[i],lon_end[i]),
-                                weight = 30, opacity = 0.35, color = "#0000FF", group = "Tracks")
+                                weight = 30, opacity = 0.55, color = "#8a49bc", group = "Tracks",
+                                label = paste("TRACK"),
+                                labelOptions = labelOptions(style = list(
+                                  "padding" = "10px",
+                                  "font-size" = "30px"
+                                ))
+                                )
       }
     }
     }
@@ -401,23 +499,53 @@ server <- function(input, output) {
       addCircles(
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
-        weight = 5, fillOpacity = 0.0, radius = 2500,
-        color = "#0000FF",
-        label = paste("Start"),
+        weight = 10, fillOpacity = 0.0, radius = 2500, opacity = .95,
+        color = "#8a49bc",
+        popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                       "<br><strong>Time: </strong></b>", mapData@data$time,
+                       "<br></b>",
+                       "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                       "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                       "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                       "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                       "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                       "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+                       ),
+        popupOptions = popupOptions(style = list(
+          "width" = "300px",
+          "padding" = "10px",
+          "font-size" = "30px"
+        )),
+        label = paste("START"),
         labelOptions = labelOptions(style = list(
           "padding" = "10px",
-          "font-size" = "35px"
+          "font-size" = "30px"
       )), group = "Tracks") %>%
       # end
       addCircles(
       lng = ~mapData@data$elon,
       lat = ~mapData@data$elat,
-      weight = 5, fillOpacity = 0.7, radius = 4000,
-      color = "#0000FF",
-      label = paste("End"),
+      weight = 10, fillOpacity = 0.7, radius = 4000, opacity = .95,
+      color = "#8a49bc",
+      popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                     "<br><strong>Time: </strong></b>", mapData@data$time,
+                     "<br></b>",
+                     "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                     "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                     "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                     "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                     "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                     "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+      ),
+      popupOptions = popupOptions(style = list(
+        "width" = "300px",
+        "padding" = "10px",
+        "font-size" = "30px"
+      )),
+      label = paste("END"),
       labelOptions = labelOptions(style = list(
         "padding" = "10px",
-        "font-size" = "35px"
+        "font-size" = "30px"
       )), group = "Tracks")
     
   })
@@ -496,6 +624,7 @@ server <- function(input, output) {
   
   #-----------------------
   
+  
   # Dimitar----
   textSize <- 15
   
@@ -520,7 +649,7 @@ server <- function(input, output) {
   #illinoisCountyData <- allTornadoes %>% filter(f1 %in% illinoisCounties$COUNTYFP | f2 %in% illinoisCounties$COUNTYFP | f3 %in% illinoisCounties$COUNTYFP | f4 %in% illinoisCounties$COUNTYFP)
   
   
-  getCountyData <- function(dataType)
+  getCountyData <- function()
   {
     dataType <- getCountyOption()
     magnitudes <- getMagnitudes()
@@ -532,13 +661,14 @@ server <- function(input, output) {
     stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
     
     stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
+    
     stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
 
 
     # MAYBE TODO
     magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
 
-    if (dataType == "Tornadoes")
+    if (dataType == "Tornadoes (magnitude)")
     {
       countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
     }
@@ -723,7 +853,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c2_state1 <- renderPlotly({
@@ -741,7 +873,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c3_state1 <- renderPlotly({
@@ -758,7 +892,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c4_state1 <- renderPlotly({
@@ -775,7 +911,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c1_state1_table <- renderDT({
@@ -845,7 +983,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c2_state2 <- renderPlotly({
@@ -863,7 +1003,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c3_state2 <- renderPlotly({
@@ -880,7 +1022,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c4_state2 <- renderPlotly({
@@ -897,7 +1041,9 @@ server <- function(input, output) {
                scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c1_state2_table <- renderDT({

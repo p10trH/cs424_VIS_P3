@@ -60,7 +60,7 @@ ui <- fluidPage(
   # -----------------------------
   # Overview
               
-              tabPanel("Overview", br(), br(),
+              tabPanel("Overview", br(),
                        column(3),
                        column(9,
                               wellPanel(
@@ -74,7 +74,7 @@ ui <- fluidPage(
   # -----------------------------
   # Explore Further
                        
-              tabPanel("Explore Further", br(), br(),
+              tabPanel("Explore Further", br(),
 
                        column(4, offset = 0, align = 'justify',
                               wellPanel(
@@ -212,7 +212,7 @@ ui <- fluidPage(
                                                                   
                                                                   # -----------------------------
                                                                   # C4
-                                                                  tabPanel("Distance From Chicago", #C4
+                                                                  tabPanel("Distance From City", #C4
                                                                            tabsetPanel(id = "chartAndTable_tabs",
                                                                                        tabPanel("Chart", 
                                                                                                 fluidRow(
@@ -346,11 +346,22 @@ ui <- fluidPage(
                                               leafletOutput("c9_state2_map")
                                        )
                               ))
+  
+                             
+  
+        
                                                                    
                        )
               )
               
-  )),
+  ),
+  fluidRow(
+    column(1, offset = 10, align = 'right', h2("Map Provider: ")),
+    column(1, offset = 0, align = 'justify',
+                  selectInput("mapProvider_Input", label = NULL, providers, width = "100%")
+  )
+  )
+  ),
   
   # -----------------------------
   # Inputs
@@ -371,13 +382,16 @@ ui <- fluidPage(
              ))
          ),
          wellPanel(
+           fluidRow(column(7, align = "right", h3("Ranges over:    ")), column(5, align = "left",  radioButtons("yearsRange_radio", label = NULL, inline = TRUE,
+                                                                                                             choices = list("CURRENT year" = 0, "All years" = 1), 
+                                                                                                             selected = 1) )),
            fluidRow(column(12, align = "justify", h2("Magnitudes"))),
            br(),
-           fluidRow(column(10, offset = 1, align = "left", checkboxGroupInput("magnitudes_Input", label = NULL, inline = TRUE,
+           fluidRow(column(10, offset = 1, align = "center", checkboxGroupInput("magnitudes_Input", label = NULL, inline = TRUE,
                               choices = list("UNKNOWN" = -9, "0" = 0, "1" = 1, "2" = 2, "3" = 3, "4" = 4, "5" = 5),
                               selected = c(0, 1, 2, 3, 4, 5)))),
            
-           br(), br(),
+           br(),
            
            fluidRow(column(12, align = "left", h2("Width"))),
            fluidRow(column(10, offset = 1, align = 'justify',
@@ -411,14 +425,21 @@ ui <- fluidPage(
 
         ),
         wellPanel(
-          fluidRow(column(6, align = "left", h2("Mapping")), column(6, align = "left", h2("Based On"))),
+          fluidRow(column(4, offset = 1, align = "left", h2("Mapping")), column(6, align = "left", h2("Based On"))),
           br(),
-          fluidRow(column(5, offset = 1, align = "justify", checkboxGroupInput("mapping_Input", label = NULL, inline = TRUE,
+          fluidRow(column(3, offset = 2, align = "justify", checkboxGroupInput("mapping_Input", label = NULL, inline = FALSE,
                                                             choices = list("Color" = 1, "Width" = 2),
                                                             selected = c())),
-                   column(5, align = "justify", selectInput("basedOn_Select", label = NULL, 
+                   column(5, align = "justify", selectInput("basedOn1_Select", label = NULL, 
                                                             choices = list("Magnitude" = 1, "Width" = 2, "Length" = 3, "Injuries" = 4, "Fatalities" = 5, "Loss" = 6), 
-                                                            selected = 1))
+                                                            selected = 1),
+                                                selectInput("basedOn2_Select", label = NULL, 
+                                                            choices = list("Magnitude" = 1, "Width" = 2, "Length" = 3, "Injuries" = 4, "Fatalities" = 5, "Loss" = 6), 
+                                                            selected = 1)
+                          
+                          
+                          
+                          )
                    
                    
                    
@@ -427,12 +448,13 @@ ui <- fluidPage(
         
         fluidRow(
           
-          column(6, align = "left",
+          column(7, align = "left",
                  
                  wellPanel(id = "mapLayers_Panel",
                            fluidRow(column(12, align = "left", h2("Map Layers"))),
-                           fluidRow(column(11, offset = 1, align = "left", checkboxGroupInput("mapLayers_Input", label = NULL, inline = FALSE,
-                                                                                  c("Tracks", "Counties"),
+                           br(),
+                           fluidRow(column(12, offset = 0, align = "center", checkboxGroupInput("mapLayers_Input", label = NULL, inline = TRUE,
+                                                                                  c("Tracks", "Counties", "SafeZone"),
                                                                                   selected = c("Tracks")))
                            )
                    
@@ -442,21 +464,25 @@ ui <- fluidPage(
                  
                  
                  
-                 ),
-          
-          
-          # wellPanel(id = "mapLayers_Panel",
-          # column(6, offset = 0, align = "left", 
-          #        fluidRow(column(12, align = "left", h2("Map Layers"))),
-          #        checkboxGroupInput("mapLayers_Input", label = NULL, inline = FALSE,
-          #                           c("Tracks", "Counties"),
-          #                           selected = c("Tracks")))
-          # ),
-          column(6, offset = 0, align = "left", 
-                 selectInput("counties_Select", label = NULL,
-                                    c("Tornadoes", "Fatalities", "Injuries", "Loss"), 
-                                    selected = 1))
-          
+          ),
+          column(5, align = "left",
+                 
+                 tags$div(id = "hide",
+                 wellPanel(id = "countiesSelect_Panel",
+                           fluidRow(column(12, align = "left", h2("Counties show:"))),
+                           br(),
+                           fluidRow(column(10, offset = 1, align = "justify",selectInput("counties_Select", label = NULL,
+                                                                                      c("Tornadoes (magnitude)", "Fatalities", "Injuries", "Loss"), 
+                                                                                      selected = 1)    )
+                           )
+                           
+                           
+                           
+                 ))
+                 
+                 
+                 
+          )
        )
          
          

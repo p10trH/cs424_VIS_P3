@@ -401,10 +401,14 @@ body {
 
 /* ---------------------------------- */
 
+.selectize-control {
+
+    margin-right: 37px;
+}
 
 /* ---------------------------------- */
 
-.selectize-input {background: #DDDDDD !important; font-size:24px; width:100%;height:50px;line-height:50px;z-index:10 !important;} .selectize-dropdown {font-size:24px;width:100%;z-index:10 !important;}
+.selectize-input {background: #DDDDDD !important; font-size:24px; width:100%;height:50px;line-height:50px;z-index:10 !important;} .selectize-dropdown {font-size:24px;width:100%;z-index:11 !important;}
 
 /* ---------------------------------- */
 
@@ -441,6 +445,9 @@ body {
 
 .checkbox{
     font-size: 26px !important;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    margin-top: -10px;
 }
 
 #magnitudes_Input {
@@ -487,6 +494,16 @@ input[type=checkbox]:checked + span{
 
 /* ---------------------------------- */
 
+.radio-inline {
+
+    padding-left: 40px !important;
+}
+
+#yearsRange_radio {
+    font-size: 26px !important;
+    padding-top: 16px !important;
+}
+
 input[type=radio] {
     /* Double-sized Checkboxes */
     -ms-transform: scale(2); /* IE */
@@ -529,7 +546,7 @@ h1 {display: inline-flex; font-size: 72px; font-weight: bold; color: #484747; pa
 
 /* ---------------------------------- */
 
-h2 {font-size: 35px; font-weight: bold;  }
+h2 {font-size: 35px; font-weight: bold; margin-top: 10px; }
 
 
 /* ---------------------------------- */
@@ -567,6 +584,24 @@ h2 {font-size: 35px; font-weight: bold;  }
     padding-top: 5px;
 }
 
+/*
+#mapLayers_Panel {
+
+    display: none
+}
+
+#countiesSelect_Panel {
+
+    display: none
+}
+*/
+
+#hide {
+z-index: 17;
+width: 100%;
+height: 100%;
+
+}
 
 /* ---------------------------------- */
 
@@ -623,7 +658,7 @@ h2 {font-size: 35px; font-weight: bold;  }
 
 .padding1 {
 
-    height:112px;
+    height:102px;
 
 }
 
