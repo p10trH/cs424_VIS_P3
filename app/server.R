@@ -835,12 +835,13 @@ server <- function(input, output, session) {
   c5Data <- function(state)
   {
     c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(Injury = inj, Fatality = fat, Year = yr, Loss = loss_updated) %>% 
+      group_by( Year = yr, Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
       summarise(Count = n()) %>%   
       mutate(Percent = (Count / sum(Count) * 100))
     
     c5$Percent <- format(round(c5$Percent, 2), nsmall = 2)
     c5$Percent <- paste0(c5$Percent, "%")
+    #Clean up currency - TODO
     #c5$Loss   <- currency(c5$Loss, digits = 0L)
     #c5$Loss   <- paste0('$',formatC(c5$Loss, big.mark=',', format = 'fg'))
     #c5$Loss   <- paste0('$', c5$Loss)
@@ -866,7 +867,7 @@ server <- function(input, output, session) {
       return(c6)
   }
   
-  #Table and chart showing the injuries, fatalities, loss per hour of the day summed over all years
+  #C7 | Table and chart showing the injuries, fatalities, loss per hour of the day summed over all years
   c7Data <- function(state)
   {
     #Check for 12 or 24 hour time format
@@ -901,7 +902,7 @@ server <- function(input, output, session) {
     return(c7)
   }
   
-  #Table and chart showing which counties were most hit by tornadoes summed over all years
+  #C8 | Table and chart showing which counties were most hit by tornadoes summed over all years
   c8Data <- function(state)
   {
     c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
@@ -1222,7 +1223,7 @@ server <- function(input, output, session) {
       ordering = T,
       lengthChange = FALSE),
       rownames = FALSE
-    )
+    ) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
   })
   
   output$c5_state2_table <- renderDT({
@@ -1237,7 +1238,7 @@ server <- function(input, output, session) {
       ordering = T,
       lengthChange = FALSE),
       rownames = FALSE
-    )
+    ) %>% formatStyle("Year", target = "row", backgroundColor = styleEqual(c(getYearAsNum()), c("gray")))
   })
   
   #c6 Chart Output | State 1 & 2
