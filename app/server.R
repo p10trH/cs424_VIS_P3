@@ -847,18 +847,6 @@ server <- function(input, output, session) {
     return(c5)
   }
   
-  #Clean up C5 table, too many columns looked bad
-  c5DataTable <- function(state)
-  {
-    c5 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(Injury = inj, Fatality = fat, Year = yr) %>% 
-      summarise(Count = n())
-
-    c5 <- dplyr::arrange(c5, Injury, Fatality)
-    
-    return(c5)
-  }
-  
   #C6 | Table and chart showing the injuries, fatalities, loss per month summed over all years
   c6Data <- function(state)
   {
@@ -878,9 +866,39 @@ server <- function(input, output, session) {
   #Table and chart showing the injuries, fatalities, loss per hour of the day summed over all years
   c7Data <- function(state)
   {
-    c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
+    #Check for 12 or 24 hour time format
+    if (getHourFormat())
+    {
+      hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
       
-      return(c7)
+      c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Injury = inj, Fatality = fat) %>% 
+        dplyr::summarise(Count = n()) %>% 
+        dplyr::mutate(Percent = (Count / sum(Count) * 100))
+      
+      c7$Hour <- ordered(c7$Hour, levels = hours24[,])
+    }
+    else
+    {
+      hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
+      
+      c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Injury = inj, Fatality = fat) %>% 
+        dplyr::summarise(Count = n()) %>% 
+        dplyr::mutate(Percent = (Count / sum(Count) * 100))
+      
+      c7$Hour <- ordered(c7$Hour, levels = hours12[,])
+    }
+    
+    
+    c7$Percent <- format(round(c7$Percent, 2), nsmall = 2)
+    c7$Percent <- paste0(c7$Percent, "%")
+    
+    c7 <- dplyr::arrange(c7, Hour, -Magnitude)
+    
+    c7$Magnitude <- factor(c7$Magnitude)
+    
+    return(c7)
   }
   
   #Table and chart showing which counties were most hit by tornadoes summed over all years
@@ -1193,7 +1211,9 @@ server <- function(input, output, session) {
   
   #C5 Table Output | State 1 & 2
   output$c5_state1_table <- renderDT({
-    c5 <- c5DataTable(getState1())
+    c5 <- c5Data(getState1())
+    c5$Percent <- NULL
+    c5$Count   <- NULL
 
     datatable(c5, options = list(
       searching = FALSE,
@@ -1206,7 +1226,9 @@ server <- function(input, output, session) {
   })
   
   output$c5_state2_table <- renderDT({
-    c5 <- c5DataTable(getState2())
+    c5 <- c5Data(getState2())
+    c5$Percent <- NULL
+    c5$Count   <- NULL
     
     datatable(c5, options = list(
       searching = FALSE,
