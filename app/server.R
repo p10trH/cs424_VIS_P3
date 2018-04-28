@@ -846,7 +846,7 @@ server <- function(input, output, session) {
     #c5$Loss   <- paste0('$',formatC(c5$Loss, big.mark=',', format = 'fg'))
     #c5$Loss   <- paste0('$', c5$Loss)
     
-    c5 <- dplyr::arrange(c5, Injury, Fatality, Loss)
+    c5 <- dplyr::arrange(c5, Year, Injury, Fatality, Loss)
     
     return(c5)
   }
@@ -1182,30 +1182,38 @@ server <- function(input, output, session) {
     
     c5 <- c5Data(getState1())
     
-    ggplotly(ggplot(c5, aes(x = Year, 
-                            y = Injury, 
-                            group = "Injury", 
-                            text = paste0("Injury: ", Injury))) + 
-               geom_line(color="red") + 
+    #p+scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))
+    
+    ggplotly(ggplot(c5, aes(Year)) +
+               geom_line(aes(y = Injury, color="Injury")) + 
+               geom_line(aes(y = Fatality, color="Fatality")) + 
+               #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
-               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
-      config(staticPlot = FALSE, displayModeBar = FALSE)
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f'), labels = c("T999", "T888",'dsa')) + #e69f00
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+            config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+            layout(yaxis = list(fixedrange = TRUE)) %>%
+            layout(xaxis = list(fixedrange = TRUE)) %>%
+            layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+            layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c5_state2 <- renderPlotly({
     
     c5 <- c5Data(getState2())
     
-    ggplotly(ggplot(c5, aes(x = Year, 
-                            y = Injury, 
-                            group = "Injury", 
-                            text = paste0("Injury: ", Count, " (", Percent, ")"))) + 
-               geom_line(stat = "identity") + 
+    ggplotly(ggplot(c5, aes(Year)) +
+               geom_line(aes(y = Injury, color="Injury")) + 
+               geom_line(aes(y = Fatality, color="Fatality")) + 
+               #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
-               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f'), labels = c("T999", "T888",'dsa')) + #e69f00
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   #C5 Table Output | State 1 & 2
