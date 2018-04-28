@@ -901,7 +901,7 @@ server <- function(input, output, session) {
       hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
       
       c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00"), Magnitude = mag) %>% 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:00"), Magnitude = mag) %>% 
         dplyr::summarise(Count = n()) %>% 
         dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
@@ -912,7 +912,7 @@ server <- function(input, output, session) {
       hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
       
       c3 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p"), Magnitude = mag) %>% 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:00 %p"), Magnitude = mag) %>% 
         dplyr::summarise(Count = n()) %>% 
         dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
@@ -1015,7 +1015,7 @@ server <- function(input, output, session) {
       hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
       
       c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:%00")) %>% 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:00")) %>% 
         dplyr::summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated)) 
       
       c7$Hour <- ordered(c7$Hour, levels = hours24[,])
@@ -1025,7 +1025,7 @@ server <- function(input, output, session) {
       hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
       
       c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:%00 %p")) %>% 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:00 %p")) %>% 
         dplyr::summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated)) 
       
       c7$Hour <- ordered(c7$Hour, levels = hours12[,])
