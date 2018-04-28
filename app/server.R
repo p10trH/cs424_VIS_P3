@@ -905,7 +905,13 @@ server <- function(input, output, session) {
   #C8 | Table and chart showing which counties were most hit by tornadoes summed over all years
   c8Data <- function(state)
   {
-    c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
+    c8 <- allTornadoes %>% #dplyr::filter(st == state) %>%
+    group_by(FIPS = stf) %>% 
+    summarise(Count = n()) %>% 
+    mutate(Percent = (Count / sum(Count) * 100))
+    
+    c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
+    c8$Percent <- paste0(c8$Percent, "%")
       
       return(c8)
   }
@@ -1385,6 +1391,32 @@ server <- function(input, output, session) {
     )
   })
   
+  #C8 Table Output | State 1 & 2
+  output$c8_state1_table <- renderDT({
+    c8 <- c8Data(getState1())
+    
+    datatable(c8, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c8_state2_table <- renderDT({
+    c8 <- c8Data(getState2())
+    
+    datatable(c8, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
   
 
   # -----------------------------
