@@ -1186,12 +1186,10 @@ server <- function(input, output, session) {
                             y = Injury, 
                             group = "Injury", 
                             text = paste0("Injury: ", Injury))) + 
-               geom_bar(stat = "identity") + 
+               geom_line(color="red") + 
                plotTheme + 
                scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
-      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
-      layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      config(staticPlot = FALSE, displayModeBar = FALSE)
   })
   
   output$c5_state2 <- renderPlotly({
@@ -1202,7 +1200,7 @@ server <- function(input, output, session) {
                             y = Injury, 
                             group = "Injury", 
                             text = paste0("Injury: ", Count, " (", Percent, ")"))) + 
-               geom_bar(stat = "identity") + 
+               geom_line(stat = "identity") + 
                plotTheme + 
                scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
