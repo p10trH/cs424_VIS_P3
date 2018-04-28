@@ -473,10 +473,10 @@ server <- function(input, output, session) {
                          "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
                          "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
                          "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
-                         "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+                         "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " M"
           ),
           popupOptions = popupOptions(style = list(
-            "width" = "300px",
+            "width" = "400px",
             "padding" = "10px",
             "font-size" = "30px"
           )),
@@ -499,10 +499,10 @@ server <- function(input, output, session) {
                          "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
                          "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
                          "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
-                         "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+                         "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " M"
           ),
           popupOptions = popupOptions(style = list(
-            "width" = "300px",
+            "width" = "400px",
             "padding" = "10px",
             "font-size" = "30px"
           )),
@@ -632,10 +632,10 @@ server <- function(input, output, session) {
                        "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
                        "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
                        "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
-                       "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+                       "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " M"
         ),
         popupOptions = popupOptions(style = list(
-          "width" = "300px",
+          "width" = "400px",
           "padding" = "10px",
           "font-size" = "30px"
         )),
@@ -658,10 +658,10 @@ server <- function(input, output, session) {
                        "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
                        "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
                        "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
-                       "<br><strong>Loss ($)    : </strong></b>", mapData@data$loss_updated
+                       "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " M"
         ),
         popupOptions = popupOptions(style = list(
-          "width" = "300px",
+          "width" = "400px",
           "padding" = "10px",
           "font-size" = "30px"
         )),
