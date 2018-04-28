@@ -922,6 +922,25 @@ server <- function(input, output, session) {
       return(c8)
   }
   
+  c8DataByState <- function(state)
+  {
+    c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(FIPS = stf, f1=f1) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+    County <- sprintf("%03d",stateFips$FIPS.County)
+    stateFips <- cbind(County, stateFips)
+    
+    #c8 <- c8 %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+    c8$State   <- stateFips$State[match(c8$FIPS, stateFips$FIPS.State)] 
+    c8$County  <- stateFips$County.Name[match(c8$f1, stateFips$County)] 
+    c8  <- na.omit(c8)
+    c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
+    c8$Percent <- paste0(c8$Percent, "%")
+    
+    return(c8)
+  }
+  
   comprss <- function(tx) { 
     div <- findInterval(as.numeric(gsub("\\,", "", tx)), 
                         c(1, 1e3, 1e6, 1e9, 1e12) )
@@ -1399,7 +1418,7 @@ server <- function(input, output, session) {
   
   #C8 Table Output | State 1 & 2
   output$c8_state1_table <- renderDT({
-    c8 <- c8Data(getState1())
+    c8 <- c8DataByState(getState1())
     
     datatable(c8, options = list(
       searching = FALSE,
@@ -1413,6 +1432,7 @@ server <- function(input, output, session) {
   
   output$c8_state2_table <- renderDT({
     c8 <- c8Data(getState2())
+    c8$Percent <- NULL
     
     datatable(c8, options = list(
       searching = FALSE,
@@ -1422,6 +1442,25 @@ server <- function(input, output, session) {
       lengthChange = FALSE),
       rownames = FALSE
     )
+  })
+  
+  output$c8_state2 <- renderPlotly({
+    
+    c8 <- c8Data(getState2())
+    
+    ggplotly(ggplot(c8, aes(x = County,
+                            y = Count,
+                            group = "State",
+                            fill = State,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) +
+               geom_bar(stat = "identity") +
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
 
