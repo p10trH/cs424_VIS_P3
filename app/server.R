@@ -1444,6 +1444,25 @@ server <- function(input, output, session) {
     )
   })
   
+    output$c8_state1 <- renderPlotly({
+    
+    c8 <- c8DataByState(getState1())
+    
+    ggplotly(ggplot(c8, aes(x = County,
+                            y = Count,
+                            group = "State",
+                            fill = State,
+                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) +
+               geom_bar(stat = "identity") +
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
   output$c8_state2 <- renderPlotly({
     
     c8 <- c8Data(getState2())
