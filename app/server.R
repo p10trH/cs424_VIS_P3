@@ -905,11 +905,17 @@ server <- function(input, output, session) {
   #C8 | Table and chart showing which counties were most hit by tornadoes summed over all years
   c8Data <- function(state)
   {
-    c8 <- allTornadoes %>% #dplyr::filter(st == state) %>%
-    group_by(FIPS = stf) %>% 
+    c8 <- allTornadoes %>% 
+    group_by(FIPS = stf, f1=f1) %>% 
     summarise(Count = n()) %>% 
     mutate(Percent = (Count / sum(Count) * 100))
+    County <- sprintf("%03d",stateFips$FIPS.County)
+    stateFips <- cbind(County, stateFips)
     
+    #c8 <- c8 %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+    c8$State   <- stateFips$State[match(c8$FIPS, stateFips$FIPS.State)] 
+    c8$County  <- stateFips$County.Name[match(c8$f1, stateFips$County)] 
+    c8  <- na.omit(c8)
     c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
     c8$Percent <- paste0(c8$Percent, "%")
       
