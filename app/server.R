@@ -925,7 +925,7 @@ server <- function(input, output, session) {
   c8DataByState <- function(state)
   {
     c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(FIPS = stf, f1=f1, f2=f2, f3=f3, f4=f4) %>% 
+      group_by(FIPS = stf, f1=f1) %>% 
       summarise(Count = n()) %>% 
       mutate(Percent = (Count / sum(Count) * 100))
     County <- sprintf("%03d",stateFips$FIPS.County)
@@ -937,6 +937,7 @@ server <- function(input, output, session) {
     c8         <- na.omit(c8)
     c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
     c8$Percent <- paste0(c8$Percent, "%")
+    c8$Percent <- NULL
     
     return(c8)
   }
@@ -1213,14 +1214,14 @@ server <- function(input, output, session) {
     
     c5 <- c5Data(getState1())
     
-    #p+scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))
-    
-    ggplotly(ggplot(c5, aes(Year)) +
+    ggplotly(ggplot(c5, aes(Year)) + guides(fill=FALSE) + 
                geom_line(aes(y = Injury, color="Injury")) + 
                geom_line(aes(y = Fatality, color="Fatality")) + 
                #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
-               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + #e69f00
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
+               guides(fill=FALSE) + 
                scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
             config(staticPlot = FALSE, displayModeBar = FALSE) %>%
             layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -1237,8 +1238,9 @@ server <- function(input, output, session) {
                geom_line(aes(y = Injury, color="Injury")) + 
                geom_line(aes(y = Fatality, color="Fatality")) + 
                #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
-               plotTheme + 
-               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + #e69f00
+               plotTheme +
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
                scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -1288,8 +1290,9 @@ server <- function(input, output, session) {
                geom_line(aes(y = Fatality, color="Fatality")) + 
                #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
                scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
-               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + #e69f00
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
                scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -1307,8 +1310,9 @@ server <- function(input, output, session) {
                geom_line(aes(y = Fatality, color="Fatality")) + 
                #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
                scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
-               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + #e69f00
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
                scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -1447,8 +1451,9 @@ server <- function(input, output, session) {
     output$c8_state1 <- renderPlotly({
     
     c8 <- c8DataByState(getState1())
-    # Limit to top 10 for space of graph
+    # Limit to top 10 for space of graph, remove colum from table for space
     c8 <- c8[order(-c8$Count), ][1:10,]
+    
     
     ggplotly(ggplot(c8, aes(x = County,
                             y = Count,
@@ -1456,6 +1461,7 @@ server <- function(input, output, session) {
                             fill = State)) +
                geom_bar(stat = "identity") +
                plotTheme + 
+               theme(legend.position="none") +
                scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
