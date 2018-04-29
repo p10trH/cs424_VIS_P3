@@ -424,66 +424,72 @@ ui <- fluidPage(
            fluidRow(column(12, align = "right", h5("Note: Entry of 0 does not mean $0")))
 
         ),
-        wellPanel(
-          fluidRow(column(4, offset = 1, align = "left", h2("Mapping")), column(6, align = "left", h2("Based On"))),
-          br(),
-          fluidRow(column(3, offset = 2, align = "justify", checkboxGroupInput("mapping_Input", label = NULL, inline = FALSE,
-                                                            choices = list("Color" = 1, "Width" = 2),
-                                                            selected = c())),
-                   column(5, align = "justify", selectInput("basedOn1_Select", label = NULL, 
-                                                            choices = list("Magnitude" = 1, "Width" = 2, "Length" = 3, "Injuries" = 4, "Fatalities" = 5, "Loss" = 6), 
-                                                            selected = 1),
-                                                selectInput("basedOn2_Select", label = NULL, 
-                                                            choices = list("Magnitude" = 1, "Width" = 2, "Length" = 3, "Injuries" = 4, "Fatalities" = 5, "Loss" = 6), 
-                                                            selected = 1)
-                          
-                          
-                          
-                          )
-                   
-                   
-                   
-                   )
-        ),
+        
+        fluidRow(
+          
+          column(12, align = "left",
+                 
+                 tags$div(id = "hide2",
+                   wellPanel(id = "mapLayers_Panel",
+                             br(),
+                             fluidRow(column(3, align = "left", h2("Map Layers")),
+                                      column(8, offset = 1, align = "left", checkboxGroupInput("mapLayers_Input", label = NULL, inline = TRUE,
+                                                                                                  c("Tracks", "Counties", "SafeZone"),
+                                                                                                  selected = c("Tracks")))
+                             ), br()
+                             
+                             
+                 ))
+                 
+          )
+        ), 
         
         fluidRow(
           
           column(7, align = "left",
                  
-                 wellPanel(id = "mapLayers_Panel",
-                           fluidRow(column(12, align = "left", h2("Map Layers"))),
-                           br(),
-                           fluidRow(column(12, offset = 0, align = "center", checkboxGroupInput("mapLayers_Input", label = NULL, inline = TRUE,
-                                                                                  c("Tracks", "Counties", "SafeZone"),
-                                                                                  selected = c("Tracks")))
-                           )
-                   
-                   
-                   
-                 )
-                 
-                 
-                 
-          ),
+            wellPanel(
+              #fluidRow(column(4, offset = 0, align = "left", h2("Mapping")), column(6, align = "left", h2("Based On"))),
+              fluidRow(column(12, offset = 0, align = "left", h2("Tracks  (mapping based on):"))),
+              
+              br(),
+              fluidRow(column(3, offset = 1, align = "justify", checkboxGroupInput("mapping_Input", label = NULL, inline = FALSE,
+                                                                choices = list("Color", "Width"),
+                                                                selected = c())),
+                       column(8, align = "justify", selectInput("basedOn1_Select", label = NULL, 
+                                                                choices = list("Magnitude", "Width", "Length", "Injuries", "Fatalities", "Loss"), 
+                                                                selected = "Magnitude"),
+                                                    selectInput("basedOn2_Select", label = NULL, 
+                                                                choices = list("Magnitude", "Width", "Length", "Injuries", "Fatalities", "Loss"), 
+                                                                selected = "Magnitude")
+
+                              )
+
+                       )
+            )),
+          
           column(5, align = "left",
                  
                  tags$div(id = "hide",
-                 wellPanel(id = "countiesSelect_Panel",
-                           fluidRow(column(12, align = "left", h2("Counties show:"))),
-                           br(),
-                           fluidRow(column(10, offset = 1, align = "justify",selectInput("counties_Select", label = NULL,
-                                                                                      c("Tornadoes (magnitude)", "Fatalities", "Injuries", "Loss"), 
-                                                                                      selected = 1)    )
-                           )
-                           
-                           
-                           
-                 ))
-                 
+                          wellPanel(id = "countiesSelect_Panel",
+                                    fluidRow(column(12, align = "left", h2("Counties  (show):"))),
+                                    br(),
+                                    fluidRow(column(11, offset = 1, align = "justify",selectInput("counties_Select", label = NULL,
+                                                                                                  c("Tornadoes (magnitude)", "Fatalities", "Injuries", "Loss"), 
+                                                                                                  selected = 1)    )
+                                    ), br(), br(), br()
+                                    
+                          ))
                  
                  
           )
-       )
+        
+        
+        
+        
+        )
+        
+
          
          
          
