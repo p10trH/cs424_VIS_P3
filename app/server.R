@@ -485,7 +485,6 @@ server <- function(input, output, session) {
     
     stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
     
-    # MAYBE TODO
     magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
     
     if (dataType == "Tornadoes (magnitude)") {
@@ -1246,9 +1245,9 @@ server <- function(input, output, session) {
   
   #illinoisCounties <- subset(counties, counties$STATEFP == 17)
   #illinoisCountyData <- allTornadoes %>% filter(f1 %in% illinoisCounties$COUNTYFP | f2 %in% illinoisCounties$COUNTYFP | f3 %in% illinoisCounties$COUNTYFP | f4 %in% illinoisCounties$COUNTYFP)
-  getMostDestructiveTornadoes <- function()
+  getMostDestructiveTornadoes <- function(state)
   {
-    topTornadoes <- dplyr::arrange(allTornadoes, desc(allTornadoes$destructionScore)) %>% top_n(10)
+    topTornadoes <- allTornadoes %>% dplyr::filter(st == state) %>% dplyr::arrange(desc(destructionScore)) %>% top_n(10)
     
     return(topTornadoes)
   }
@@ -1515,6 +1514,21 @@ server <- function(input, output, session) {
     paste(round( as.numeric(gsub("\\,","",tx))/10^(3*(div-1)), 2), 
           c("","K","M","B","T")[div] )}
   
+  compressBigNumbers <- function(num)
+  {
+    if (num >= 1e12) {
+      paste(format(round(num / 1e12, 1), trim = TRUE), "T")
+    } else if (num >= 1e9) {
+      paste(format(round(num / 1e9, 1), trim = TRUE), "B")
+    } else if (num >= 1e6) {
+      paste(format(round(num / 1e6, 1), trim = TRUE), "M")
+    } else if (num >= 1e3) {
+      paste(format(round(num / 1e3, 1), trim = TRUE), "K")
+    } else {
+      paste(num)
+    }
+  }
+  
   #State 1
   
   output$c1_state1 <- renderPlotly({
@@ -1567,6 +1581,7 @@ server <- function(input, output, session) {
                             text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
+               theme(axis.text.x = element_text(angle = 30)) +
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -1713,6 +1728,7 @@ server <- function(input, output, session) {
                             text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
+               theme(axis.text.x = element_text(angle = 30)) +
                scale_fill_brewer(type = "seq"), tooltip = c("text", "fill")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -1808,14 +1824,34 @@ server <- function(input, output, session) {
     )
   })
   
-  output$b4_table <- renderDT({
-    b4 <- getMostDestructiveTornadoes()
+  output$b4_state1_table <- renderDT({
+    b4 <- getMostDestructiveTornadoes(getState1())
+    
+    b4 <- b4 %>% dplyr::select(Date = date, Magnitude = mag, Injuries = inj, Fatalities = fat, Loss = loss_updated, Length = len)
+    b4$Loss <- paste0("$", b4$Loss, " (", sapply(b4$Loss, function(x) compressBigNumbers(x)), ")")
+    #b4$Loss <- paste0("$", b4$Loss, " (", sapply(b4$Loss, function(x) compressBigNumbers(x), ")"))
     
     datatable(b4, options = list(
       columnDefs = list(list(className = 'dt-center', targets = "_all")),
       searching = FALSE,
       pageLength = 10,
-      dom = "tp",
+      dom = "t",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE)
+  })
+  
+  output$b4_state2_table <- renderDT({
+    b4 <- getMostDestructiveTornadoes(getState2())
+    
+    b4 <- b4 %>% dplyr::select(Date = date, Magnitude = mag, Injuries = inj, Fatalities = fat, Loss = loss_updated, Length = len)
+    b4$Loss <- paste0("$", b4$Loss, " (", sapply(b4$Loss, function(x) compressBigNumbers(x)), ")")
+    
+    datatable(b4, options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE,
+      pageLength = 10,
+      dom = "t",
       ordering = T,
       lengthChange = FALSE),
       rownames = FALSE)
@@ -2002,6 +2038,7 @@ server <- function(input, output, session) {
                             text = paste0(variable, ": ", value))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
+               theme(axis.text.x = element_text(angle = 30)) +
                scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
@@ -2018,10 +2055,118 @@ server <- function(input, output, session) {
                             text = paste0(variable, ": ", value))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
+               theme(axis.text.x = element_text(angle = 30)) +
                scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))
+  })
+  
+  #C8 | Table and chart showing which counties were most hit by tornadoes summed over all years
+  c8Data <- function(state)
+  {
+    c8 <- allTornadoes %>% 
+      group_by(FIPS = stf, f1=f1) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+    County <- sprintf("%03d",stateFips$FIPS.County)
+    stateFips <- cbind(County, stateFips)
+    
+    #c8$ <- c8$ %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+    c8$State   <- stateFips$State[match(c8$FIPS, stateFips$FIPS.State)] 
+    c8$County  <- stateFips$County.Name[match(c8$f1, stateFips$County)] 
+    c8         <- na.omit(c8)
+    c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
+    c8$Percent <- paste0(c8$Percent, "%")
+    
+    return(c8)
+  }
+  
+  c8DataByState <- function(state)
+  {
+    c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
+      group_by(FIPS = stf, f1=f1, f2=f2, f3=f3, f4=f4) %>% 
+      summarise(Count = n()) %>% 
+      mutate(Percent = (Count / sum(Count) * 100))
+    County <- sprintf("%03d",stateFips$FIPS.County)
+    stateFips <- cbind(County, stateFips)
+    
+    #c8 <- c8 %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+    c8$State   <- stateFips$State[match(c8$FIPS, stateFips$FIPS.State)] 
+    c8$County  <- stateFips$County.Name[match(c8$f1, stateFips$County)] 
+    c8         <- na.omit(c8)
+    c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
+    c8$Percent <- paste0(c8$Percent, "%")
+    
+    return(c8)
+  }
+  
+  #C8 Table Output | State 1 & 2
+  output$c8_state1_table <- renderDT({
+    c8 <- c8DataByState(getState1())
+    
+    datatable(c8, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c8_state2_table <- renderDT({
+    c8 <- c8DataByState(getState2())
+    c8$Percent <- NULL
+    
+    datatable(c8, options = list(
+      searching = FALSE,
+      pageLength = 10,
+      dom = "tp",
+      ordering = T,
+      lengthChange = FALSE),
+      rownames = FALSE
+    )
+  })
+  
+  output$c8_state1 <- renderPlotly({
+    
+    c8 <- c8DataByState(getState1())
+    # Limit to top 10 for space of graph
+    c8 <- c8[order(-c8$Count), ][1:10,]
+    
+    ggplotly(ggplot(c8, aes(x = County,
+                            y = Count,
+                            group = "State",
+                            fill = State)) +
+               geom_bar(stat = "identity") +
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
+  output$c8_state2 <- renderPlotly({
+    
+    c8 <- c8DataByState(getState2())
+    # Top 15 for graph room
+    c8 <- c8[order(-c8$Count), ][1:15,]
+    
+    ggplotly(ggplot(c8, aes(x = County,
+                            y = Count,
+                            group = "State",
+                            fill = State )) +
+               geom_bar(stat = "identity") +
+               plotTheme + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   # -----------------------------

@@ -63,11 +63,24 @@ ui <- fluidPage(
               tabPanel("Overview", br(),
                        column(3, 
                               
-                              wellPanel(
-                                fluidRow(column(12, align = "left", "placeholder"))),
+                              # wellPanel(
+                              #   fluidRow(column(12, align = "left", "placeholder"))),
+                              # 
+                              
+                              # wellPanel(
+                              #   fluidRow(column(12, align = "left", "placeholder")))
                               
                               wellPanel(
-                                fluidRow(column(12, align = "left", "placeholder")))
+                                fluidRow(column(12, align = "left",
+                                                tags$style(type = "text/css", "#c1_state1_table {min-height:30vh !important;}"),
+                                                DTOutput("b4_state1_table"))
+                                )),
+                              
+                              wellPanel(
+                                fluidRow(column(12, align = "left",
+                                                tags$style(type = "text/css", "#c1_state1_table {min-height:30vh !important;}"),
+                                                DTOutput("b4_state2_table"))
+                                ))
                               
                               ),
                        column(9,
