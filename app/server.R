@@ -502,6 +502,20 @@ server <- function(input, output, session) {
     }
     
     # ----
+    mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum(), mag %in% getMagnitudes())
+    #mapData <- filter(mapData, mag %in% getMagnitudes())
+    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    colnames(mapData)[8] <- "STUSPS"
+    stateSelected <- subset(states, STUSPS == getState1())
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    #mapData <- subset(mapData, STUSPS == getState1())
+    
+    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
+    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
+    
     # get map and clear shapes
     proxy <- leafletProxy("c9_state1_map", data = mapData) %>% clearShapes()
     
@@ -586,28 +600,8 @@ server <- function(input, output, session) {
     # track data
     #mapData = state1_map_track_data()
     
-    mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum(), mag %in% getMagnitudes())
-    #mapData <- filter(mapData, mag %in% getMagnitudes())
-    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
-    colnames(mapData)[8] <- "STUSPS"
-    stateSelected <- subset(states, STUSPS == getState1())
-    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
-    #mapData <- subset(mapData, STUSPS == getState1())
     
-    
-    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
-    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
-    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
-    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
-    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
-    
-    
-    # -----------
 
-    #else
-    #    palColorTracks <- colorBin("#8a49bc", 1)
-    
-    # -----------
     
     
     lat_start <- mapData@data$slat
@@ -780,6 +774,21 @@ server <- function(input, output, session) {
     }
     
     # ----
+    mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum(), mag %in% getMagnitudes())
+    #mapData <- filter(mapData, mag %in% getMagnitudes())
+    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    colnames(mapData)[8] <- "STUSPS"
+    stateSelected <- subset(states, STUSPS == getState2())
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    #mapData <- subset(mapData, STUSPS == getState1())
+    
+    
+    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
+    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
+    
     # get map and clear shapes
     proxy <- leafletProxy("c9_state2_map", data = mapData) %>% clearShapes()
     
@@ -864,29 +873,8 @@ server <- function(input, output, session) {
     # track data
     #mapData = state1_map_track_data()
     
-    mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum(), mag %in% getMagnitudes())
-    #mapData <- filter(mapData, mag %in% getMagnitudes())
-    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
-    colnames(mapData)[8] <- "STUSPS"
-    stateSelected <- subset(states, STUSPS == getState2())
-    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
-    #mapData <- subset(mapData, STUSPS == getState1())
-    
-    
-    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
-    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
-    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
-    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
-    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
-    
-    
-    # -----------
-    
-    #else
-    #    palColorTracks <- colorBin("#8a49bc", 1)
-    
-    # -----------
-    
+
+
     
     lat_start <- mapData@data$slat
     lat_end <- mapData@data$elat
