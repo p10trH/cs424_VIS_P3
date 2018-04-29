@@ -31,5 +31,7 @@ library(shinyjs)
 
 library(rgdal)
 
+library(RColorBrewer)
+
 # -----------------------------
 

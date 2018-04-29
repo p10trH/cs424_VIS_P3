@@ -300,7 +300,8 @@ server <- function(input, output, session) {
         tiles = providers$Stamen.TonerLite,
         toggleDisplay = TRUE,
         width = 400, height = 400,
-        collapsedWidth = 50, collapsedHeight = 50) %>% 
+        collapsedWidth = 50, collapsedHeight = 50,
+        aimingRectOptions = list(color = "#333333", weight = 1, clickable = FALSE)) %>% 
       addMeasure(    position = "bottomleft",
                      primaryLengthUnit = "meters",
                      primaryAreaUnit = "sqmeters",
@@ -419,7 +420,7 @@ server <- function(input, output, session) {
     activeState <- subset(states, STUSPS == getState1())
     
     # outline of all states
-    proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.0, fillColor = "black")
+    proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.2, fillColor = "black")
     
     # active state outline and fill
     proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
@@ -520,26 +521,45 @@ server <- function(input, output, session) {
     
     #state <- toString(mapData@data$STUSPS[1])
     
-    
-    
+    # ---- color mapping
     mappings <- getTrackMappings()
     
     basedOnColor <- input$basedOn1_Select
-    
     
     if ("Color" %in% mappings) {
       
       if (basedOnColor == "Magnitude") {
         palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
         mapData@data$dataToMap <- mapData@data$mag
-        
       }
-      
-      
+      else if (basedOnColor == "Width") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+        mapData@data$dataToMap <- mapData@data$wid
+      }
+      else if (basedOnColor == "Length") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+        mapData@data$dataToMap <- mapData@data$len
+      }
+      else if (basedOnColor == "Injuries") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+        mapData@data$dataToMap <- mapData@data$inj
+      }
+      else if (basedOnColor == "Fatalities") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+        mapData@data$dataToMap <- mapData@data$fat
+      }
+      else if (basedOnColor == "Loss") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+        mapData@data$dataToMap <- mapData@data$loss_updated
+      }
+  
     }else {
       palColorTracks <- colorBin("#8a49bc", 1)
       mapData@data$dataToMap <- rep(1, nrow(mapData@data))
     }
+    
+    
+    basedOnWidth <- input$basedOn2_Select
     
  
     # 
@@ -548,9 +568,10 @@ server <- function(input, output, session) {
         
         if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
           
+                  # default width: 15
                   proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
                                         lng = c(lon_start[i],lon_end[i]),
-                                        weight = 15, opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
+                                        weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
                                         label = paste("TRACK"),
                                         labelOptions = labelOptions(style = list(
                                           "padding" = "10px",
@@ -562,12 +583,13 @@ server <- function(input, output, session) {
       }
     }
     
+    # default radius: 4000
     proxy %>%
       # start
       addCircles(
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
-        weight = 12, fillOpacity = 0.0, radius = 4000, opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+        weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
                        "<br></b>",
@@ -592,7 +614,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$elon,
         lat = ~mapData@data$elat,
-        weight = 15, fillOpacity = 0.6, radius = 4000, opacity = .96,
+        weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
         color = ~palColorTracks(mapData@data$dataToMap),
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
@@ -617,11 +639,162 @@ server <- function(input, output, session) {
     
     # -----------
     
-    
-    
-    
-    
+
   })
+  
+  # ------------
+  
+  mapTrackWidth <- function(mappings, basedOnWidth, i, mapData, newLowerB, newUpperB, flagType){
+    
+    if (flagType == "weight") {
+      
+        if ("Size" %in% mappings) {
+          
+          if (basedOnWidth == "Magnitude") {
+            #palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
+            #mapData@data$dataToMap <- mapData@data$mag
+            
+            value <- mapData@data$mag[i]
+            
+            oldLowerB <- 0
+            oldUpperB <- 5
+            
+          }
+          else if (basedOnWidth == "Width") {
+            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+            #mapData@data$dataToMap <- mapData@data$wid
+            
+            value <- mapData@data$wid[i]
+            
+            oldLowerB <- getWidthLower()
+            oldUpperB <- getWidthUpper()
+          }
+          else if (basedOnWidth == "Length") {
+            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+            #mapData@data$dataToMap <- mapData@data$len
+            
+            value <- mapData@data$len[i]
+            
+            oldLowerB <- getLengthLower()
+            oldUpperB <- getLengthUpper()
+          }
+          else if (basedOnWidth == "Injuries") {
+            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+            #mapData@data$dataToMap <- mapData@data$inj
+            
+            value <- mapData@data$inj[i]
+            
+            oldLowerB <- getInjuriesLower()
+            oldUpperB <- getInjuriesUpper()
+          }
+          else if (basedOnWidth == "Fatalities") {
+            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+            #mapData@data$dataToMap <- mapData@data$fat
+            
+            value <- mapData@data$fat[i]
+            
+            oldLowerB <- getFatalitiesLower()
+            oldUpperB <- getFatalitiesUpper()
+          }
+          else if (basedOnWidth == "Loss") {
+            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+            #mapData@data$dataToMap <- mapData@data$loss_updated
+            
+            value <- mapData@data$loss_updated[i]
+           
+            oldLowerB <- getLossLower()
+            oldUpperB <- getLossUpper() 
+          }
+          
+        } else {
+            return(15)
+        }
+        
+        return ( (value - oldLowerB)*((newUpperB - newLowerB)/(oldUpperB - oldLowerB)) + newLowerB  )
+      
+    } else {
+      
+      if ("Size" %in% mappings) {
+        
+        if (basedOnWidth == "Magnitude") {
+          #palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
+          mapData@data$dataToMap2 <- mapData@data$mag
+          
+          #value <- mapData@data$mag[i]
+          
+          oldLowerB <- 0
+          oldUpperB <- 5
+          
+        }
+        else if (basedOnWidth == "Width") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+          mapData@data$dataToMap2 <- mapData@data$wid
+          
+          #value <- mapData@data$wid[i]
+          
+          oldLowerB <- getWidthLower()
+          oldUpperB <- getWidthUpper()
+        }
+        else if (basedOnWidth == "Length") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+          mapData@data$dataToMap2 <- mapData@data$len
+          
+          #value <- mapData@data$len[i]
+          
+          oldLowerB <- getLengthLower()
+          oldUpperB <- getLengthUpper()
+        }
+        else if (basedOnWidth == "Injuries") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+          mapData@data$dataToMap2 <- mapData@data$inj
+          
+          #value <- mapData@data$inj[i]
+          
+          oldLowerB <- getInjuriesLower()
+          oldUpperB <- getInjuriesUpper()
+        }
+        else if (basedOnWidth == "Fatalities") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+          mapData@data$dataToMap2 <- mapData@data$fat
+          
+          #value <- mapData@data$fat[i]
+          
+          oldLowerB <- getFatalitiesLower()
+          oldUpperB <- getFatalitiesUpper()
+        }
+        else if (basedOnWidth == "Loss") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+          mapData@data$dataToMap2 <- mapData@data$loss_updated
+          
+          #value <- mapData@data$loss_updated[i]
+          
+          oldLowerB <- getLossLower()
+          oldUpperB <- getLossUpper() 
+        }
+            
+      } else {
+        
+        mapData@data$dataToMap2 <- rep(4000, nrow(mapData@data))
+        
+        return(mapData@data$dataToMap2)
+      }
+      
+      if (length(mapData@data$dataToMap2) > 0 && !is.na(mapData@data$dataToMap2)) {
+        for(j in 1:length(mapData@data$dataToMap2)){
+          
+          mapData@data$dataToMap2[j] <- (mapData@data$dataToMap2[j] - oldLowerB)*((newUpperB - newLowerB)/(oldUpperB - oldLowerB)) + newLowerB
+       
+             
+        }
+      }
+      
+      return ( mapData@data$dataToMap2  )
+    
+    }
+    
+  }
+  
+  # ------------
   
   #outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE) # causes errors in console? don't use?
   
@@ -651,7 +824,8 @@ server <- function(input, output, session) {
         tiles = providers$Stamen.TonerLite,
         toggleDisplay = TRUE,
         width = 400, height = 400,
-        collapsedWidth = 50, collapsedHeight = 50) %>% 
+        collapsedWidth = 50, collapsedHeight = 50,
+        aimingRectOptions = list(color = "#333333", weight = 1, clickable = FALSE)) %>% 
       addMeasure(    position = "bottomleft",
                      primaryLengthUnit = "meters",
                      primaryAreaUnit = "sqmeters",
@@ -693,46 +867,46 @@ server <- function(input, output, session) {
     return(topTornadoes)
   }
   
-  getCountyData <- function()
-  {
-    dataType <- getCountyOption()
-    magnitudes <- getMagnitudes()
-    
-    stateCode <- filter(stateFips, stateFips$State == substr(input$state1_select, 6, stop = 1000))
-    
-    
-    
-    stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
-    
-    stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
-    
-    stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
-    
-    
-    # MAYBE TODO
-    magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
-    
-    if (dataType == "Tornadoes (magnitude)")
-    {
-      countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
-    }
-    else if (dataType ==  "Fatalities")
-    {
-      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(fat))
-    }
-    else if (dataType == "Injuries")
-    {
-      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
-    }
-    else if (dataType == "Loss")
-    {
-      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
-    }
-    
-    countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
-    
-    return(countyData)
-  }
+  # getCountyData <- function()
+  # {
+  #   dataType <- getCountyOption()
+  #   magnitudes <- getMagnitudes()
+  #   
+  #   stateCode <- filter(stateFips, stateFips$State == substr(input$state1_select, 6, stop = 1000))
+  #   
+  #   
+  #   
+  #   stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
+  #   
+  #   stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
+  #   
+  #   stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+  #   
+  #   
+  #   # MAYBE TODO
+  #   magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
+  #   
+  #   if (dataType == "Tornadoes (magnitude)")
+  #   {
+  #     countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
+  #   }
+  #   else if (dataType ==  "Fatalities")
+  #   {
+  #     countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(fat))
+  #   }
+  #   else if (dataType == "Injuries")
+  #   {
+  #     countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
+  #   }
+  #   else if (dataType == "Loss")
+  #   {
+  #     countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
+  #   }
+  #   
+  #   countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
+  #   
+  #   return(countyData)
+  # }
   
   # getCountyData <- function(dataType)
   # {

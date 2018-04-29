@@ -454,7 +454,7 @@ ui <- fluidPage(
               
               br(),
               fluidRow(column(3, offset = 1, align = "justify", checkboxGroupInput("mapping_Input", label = NULL, inline = FALSE,
-                                                                choices = list("Color", "Width"),
+                                                                choices = list("Color", "Size"),
                                                                 selected = c())),
                        column(8, align = "justify", selectInput("basedOn1_Select", label = NULL, 
                                                                 choices = list("Magnitude", "Width", "Length", "Injuries", "Fatalities", "Loss"), 
