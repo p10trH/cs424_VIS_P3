@@ -129,7 +129,13 @@ ui <- fluidPage(
                                                                                 plotlyOutput("c5_state1")),
                                                                          column(6,
                                                                                 tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
-                                                                                plotlyOutput("c5_state2"))
+                                                                                plotlyOutput("c5_state2")),
+                                                                         column(6,
+                                                                                tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                plotlyOutput("c5_state1Loss")),
+                                                                         column(6,
+                                                                                tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                plotlyOutput("c5_state2Loss"))
                                                                        )
                                                               ),
                                                               tabPanel("Table",
@@ -140,6 +146,7 @@ ui <- fluidPage(
                                                                          column(6,
                                                                                 tags$style(type = "text/css", "#c5_state2_table {min-height:30vh !important;}"),
                                                                                 DTOutput("c5_state2_table"))
+
                                                                        )
                                                               )
                                                   )
@@ -282,7 +289,13 @@ ui <- fluidPage(
                                                                                                          plotlyOutput("c6_state1")), #, height = "80vh"
                                                                                                   column(6,
                                                                                                          tags$style(type = "text/css", "#c6_state2 {min-height:30vh !important;}"),
-                                                                                                         plotlyOutput("c6_state2"))
+                                                                                                         plotlyOutput("c6_state2")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c6_state1Loss")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c6_state2Loss"))
                                                                                                 )
                                                                                        ),
                                                                                        tabPanel("Table", 
@@ -310,7 +323,13 @@ ui <- fluidPage(
                                                                                                          plotlyOutput("c7_state1")),
                                                                                                   column(6,
                                                                                                          tags$style(type = "text/css", "#c7_state2 {min-height:30vh !important;}"),
-                                                                                                         plotlyOutput("c7_state2"))
+                                                                                                         plotlyOutput("c7_state2")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c7_state1Loss")),
+                                                                                                  column(6,
+                                                                                                         tags$style(type = "text/css", "#c5_state2 {min-height:30vh !important;}"),
+                                                                                                         plotlyOutput("c7_state2Loss"))
                                                                                                 )
                                                                                        ),
                                                                                        tabPanel("Table",
