@@ -61,7 +61,15 @@ ui <- fluidPage(
   # Overview
               
               tabPanel("Overview", br(),
-                       column(3),
+                       column(3, 
+                              
+                              wellPanel(
+                                fluidRow(column(12, align = "left", "placeholder"))),
+                              
+                              wellPanel(
+                                fluidRow(column(12, align = "left", "placeholder")))
+                              
+                              ),
                        column(9,
                               wellPanel(
                                 fluidRow(column(12, offset = 0, align = 'justify',
@@ -384,7 +392,7 @@ ui <- fluidPage(
          wellPanel(
            fluidRow(column(7, align = "right", h3("Ranges over:    ")), column(5, align = "left",  radioButtons("yearsRange_radio", label = NULL, inline = TRUE,
                                                                                                              choices = list("CURRENT year" = 0, "All years" = 1), 
-                                                                                                             selected = 1) )),
+                                                                                                             selected = 0) )),
            fluidRow(column(12, align = "justify", h2("Magnitudes"))),
            br(),
            fluidRow(column(10, offset = 1, align = "center", checkboxGroupInput("magnitudes_Input", label = NULL, inline = TRUE,

@@ -10,6 +10,7 @@ allStatesLatLng <- read.csv(file = "data/all_states_lat_lng.csv", header = TRUE)
 stateBounds <- read.csv(file = "data/state_Bounds.csv", header = TRUE)
 counties <- readOGR("data/shpf/cb_2017_us_county_20m.shp", layer = "cb_2017_us_county_20m", stringsAsFactors = FALSE)
 
+
 # -----------------------------
 server <- function(input, output, session) {
   
@@ -249,35 +250,35 @@ server <- function(input, output, session) {
   # -----------------------------
   
   # try to filter data elsewhere so no double rendering?
-  state1_map_track_data <- reactive({
-    
-    #selYear <- getYearAsNum()
-    
-    mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
-    mapData <- filter(mapData, mag %in% getMagnitudes())
-    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
-    colnames(mapData)[8] <- "STUSPS"
-    stateSelected <- subset(states, STUSPS == getState1())
-    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
-    #mapData <- subset(mapData, STUSPS == getState1())
-    
-    return(mapData)
-  })
+  # state1_map_track_data <- reactive({
+  #   
+  #   #selYear <- getYearAsNum()
+  #   
+  #   mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum())
+  #   mapData <- filter(mapData, mag %in% getMagnitudes())
+  #   #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+  #   colnames(mapData)[8] <- "STUSPS"
+  #   stateSelected <- subset(states, STUSPS == getState1())
+  #   mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+  #   #mapData <- subset(mapData, STUSPS == getState1())
+  #   
+  #   return(mapData)
+  # })
   
-  state2_map_track_data <- reactive({
-    
-    #selYear <- getYearAsNum()
-    
-    mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
-    mapData <- filter(mapData, mag %in% getMagnitudes())
-    #mapData <- filter(mapData, wid >= input$width_dSlider[1] & wid <= input$width_dSlider[2])
-    colnames(mapData)[8] <- "STUSPS"
-    stateSelected <- subset(states, STUSPS == getState2())
-    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
-    #mapData <- subset(mapData, STUSPS == getState1())
-    
-    return(mapData)
-  })
+  # state2_map_track_data <- reactive({
+  #   
+  #   #selYear <- getYearAsNum()
+  #   
+  #   mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum())
+  #   mapData <- filter(mapData, mag %in% getMagnitudes())
+  #   #mapData <- filter(mapData, wid >= input$width_dSlider[1] & wid <= input$width_dSlider[2])
+  #   colnames(mapData)[8] <- "STUSPS"
+  #   stateSelected <- subset(states, STUSPS == getState2())
+  #   mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+  #   #mapData <- subset(mapData, STUSPS == getState1())
+  #   
+  #   return(mapData)
+  # })
   
   # -----------------------------
   # c9 state 1 leaflet
@@ -291,7 +292,36 @@ server <- function(input, output, session) {
     leftB <- initState$left_bound
     topB <- initState$top_bound
     
-    leaflet(options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
+    leaflet(options = leafletOptions(minZoom = 7, maxZoom = 15)) %>%
+      setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
+      setMaxBounds(rightB, bottomB, leftB, topB) %>%
+      addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
+                       options = providerTileOptions(noWrap = TRUE)) %>% hideGroup("Counties")%>%
+      addMiniMap(
+        tiles = providers$Stamen.TonerLite,
+        toggleDisplay = TRUE,
+        width = 400, height = 400,
+        collapsedWidth = 50, collapsedHeight = 50,
+        aimingRectOptions = list(color = "#333333", weight = 1, clickable = FALSE)) %>% 
+      addMeasure(    position = "bottomleft",
+                     primaryLengthUnit = "meters",
+                     primaryAreaUnit = "sqmeters",
+                     activeColor = "#3D535D",
+                     completedColor = "#3D535D")
+  })
+  
+  # c9 state 2 leaflet
+  output$c9_state2_map <- renderLeaflet({ # initialize map
+    
+    # initialize map to default dropdown state value
+    initState <- filter(stateBounds, STUSPS == "KS")
+    
+    rightB <- initState$right_bound
+    bottomB <- initState$bottom_bound
+    leftB <- initState$left_bound
+    topB <- initState$top_bound
+    
+    leaflet(options = leafletOptions(minZoom = 7, maxZoom = 15)) %>%
       setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
       setMaxBounds(rightB, bottomB, leftB, topB) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
@@ -313,6 +343,7 @@ server <- function(input, output, session) {
   # an observer. Each independent set of things that can change
   # should be managed in its own observer.
   
+  # c9 state 1 leaflet
   observe({ # set view and max bounds
     
     activeState <- subset(states, STUSPS == getState1())
@@ -329,6 +360,24 @@ server <- function(input, output, session) {
       setMaxBounds(rightB, bottomB, leftB, topB)
   })
   
+  # c9 state 2 leaflet
+  observe({ # set view and max bounds
+    
+    activeState <- subset(states, STUSPS == getState2())
+    
+    rightB <- activeState@data$right_bound
+    bottomB <- activeState@data$bottom_bound
+    leftB <- activeState@data$left_bound
+    topB <- activeState@data$top_bound
+    
+    proxy <- leafletProxy("c9_state2_map")
+    
+    # set view and max Bounds
+    proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>% 
+      setMaxBounds(rightB, bottomB, leftB, topB)
+  })
+  
+  # c9 state 1 leaflet
   observe({ # sync zoom
     
     zLevel <- getZoomState2()
@@ -336,13 +385,25 @@ server <- function(input, output, session) {
     runjs(paste("var el = document.getElementById(\"c9_state1_map\"); var map = $(el).data(\"leaflet-map\"); map.setZoom(", zLevel,")"))
   })
   
+  # c9 state 2 leaflet
+  observe({ # sync zoom
+    
+    zLevel <- getZoomState1()
+    
+    runjs(paste("var el = document.getElementById(\"c9_state2_map\"); var map = $(el).data(\"leaflet-map\"); map.setZoom(", zLevel,")"))
+  })
+  
+  # c9 state 1 & 2 leaflet
   observe({ # map provider
     
     proxy <- leafletProxy("c9_state1_map")
+    proxy2 <- leafletProxy("c9_state2_map")
     
     proxy %>% clearTiles() %>% addProviderTiles(getMapProvider(), options = providerTileOptions(noWrap = TRUE))
+    proxy2 %>% clearTiles() %>% addProviderTiles(getMapProvider(), options = providerTileOptions(noWrap = TRUE))
   })
   
+  # c9 state 1 & 2 leaflet
   observe({ # handle map layers
     
     #message("-------OBSERVE 2 START-------")
@@ -350,16 +411,25 @@ server <- function(input, output, session) {
     layers <- getMapLayers()
     
     proxy <- leafletProxy("c9_state1_map")
+    proxy2 <- leafletProxy("c9_state2_map")
     
-    if ("Counties" %in% layers)
+    if ("Counties" %in% layers) {
       proxy %>% showGroup("Counties")
-    else
+      proxy2 %>% showGroup("Counties")
+    }
+    else {
       proxy %>% hideGroup("Counties")
+      proxy2 %>% hideGroup("Counties")
+    }
     
-    if ("Tracks" %in% layers)
+    if ("Tracks" %in% layers) {
       proxy %>% showGroup("Tracks")
-    else
+      proxy2 %>% showGroup("Tracks")
+    }
+    else {
       proxy %>% hideGroup("Tracks")
+      proxy2 %>% hideGroup("Tracks")
+    }
     
     
     if ("Counties" %in% layers && "Tracks" %in% layers){
@@ -369,12 +439,29 @@ server <- function(input, output, session) {
       
       proxy %>% showGroup("Counties")
       proxy %>% showGroup("Tracks")
+      
+      proxy2 %>% hideGroup("Counties")
+      proxy2 %>% hideGroup("Tracks")
+      
+      proxy2 %>% showGroup("Counties")
+      proxy2 %>% showGroup("Tracks")
     }
     
     #message("-------OBSERVE 2 END-------")
   })
   
+
+  
+  # c9 state 1 leaflet
   observe({ # render track data, counties
+    
+    # 
+    # req(input$width_dSlider)
+    # req(input$length_dSlider)
+    # req(input$injuries_dSlider)
+    # req(input$fatalities_dSlider)
+    # req(input$loss_dSlider)
+    #
     
     # -----------
     # counties data
@@ -389,6 +476,7 @@ server <- function(input, output, session) {
     
     stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
     
+    #maybe just calculate from data so it doesn't double render
     stateCountyData <- subset(stateCountyData, wid >= getWidthLower() & wid <= getWidthUpper())
     stateCountyData <- subset(stateCountyData, len >= getLengthLower() & len <= getLengthUpper())
     stateCountyData <- subset(stateCountyData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
@@ -446,7 +534,7 @@ server <- function(input, output, session) {
       else
         bins <- c(0, maxCount * 0.01, maxCount * 0.02, maxCount * 0.05, maxCount * 0.1, maxCount * 0.2, maxCount * 0.5, maxCount * 0.7, maxCount)
       
-      pal <- colorBin("YlOrRd", domain = countyData$Count, bins = bins, na.color = "#99999955")
+      pal <- colorBin("OrRd", domain = countyData$Count, bins = bins, na.color = "#99999955")
       
       #message("-----OBSERVE 1 BP 3-----")
       
@@ -496,7 +584,16 @@ server <- function(input, output, session) {
     
     #message("-----OBSERVE 1 START-----")
     # track data
-    mapData = state1_map_track_data()
+    #mapData = state1_map_track_data()
+    
+    mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum(), mag %in% getMagnitudes())
+    #mapData <- filter(mapData, mag %in% getMagnitudes())
+    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    colnames(mapData)[8] <- "STUSPS"
+    stateSelected <- subset(states, STUSPS == getState1())
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    #mapData <- subset(mapData, STUSPS == getState1())
+    
     
     mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
     mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
@@ -640,6 +737,284 @@ server <- function(input, output, session) {
     # -----------
     
 
+  })
+  
+  # c9 state 2 leaflet
+  observe({ # render track data, counties
+    
+    # -----------
+    # counties data
+    #countyData <- getCountyData()
+    
+    dataType <- getCountyOption()
+    magnitudes <- getMagnitudes()
+    
+    stateCode <- filter(stateFips, stateFips$State == substr(input$state2_select, 6, stop = 1000))
+    
+    stateCounties <- subset(counties, counties$STATEFP == stateCode$FIPS.State[1])
+    
+    stateCountyData <- allTornadoes %>% filter(yr == getYearAsNum())
+    
+    stateCountyData <- subset(stateCountyData, wid >= getWidthLower() & wid <= getWidthUpper())
+    stateCountyData <- subset(stateCountyData, len >= getLengthLower() & len <= getLengthUpper())
+    stateCountyData <- subset(stateCountyData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    stateCountyData <- subset(stateCountyData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    stateCountyData <- subset(stateCountyData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
+    
+    stateCountyData <- stateCountyData %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+    
+    # MAYBE TODO
+    magStateCountyData <- stateCountyData %>% dplyr::filter(mag %in% magnitudes)
+    
+    if (dataType == "Tornadoes (magnitude)") {
+      countyData <- magStateCountyData %>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = n())
+    }
+    else if (dataType ==  "Fatalities") {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(fat))
+    }
+    else if (dataType == "Injuries") {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
+    }
+    else if (dataType == "Loss") {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
+    }
+    
+    # ----
+    # get map and clear shapes
+    proxy <- leafletProxy("c9_state2_map", data = mapData) %>% clearShapes()
+    
+    activeState <- subset(states, STUSPS == getState2())
+    
+    # outline of all states
+    proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.2, fillColor = "black")
+    
+    # active state outline and fill
+    proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
+    
+    # ----
+    
+    #message("-----OBSERVE 1 BP 1-----")
+    if (nrow(countyData) != 0)
+    {
+      #return()
+      
+      countyData <- sp::merge(stateCounties, countyData, by = c("COUNTYFP"))
+      
+      #message("-----OBSERVE 1 BP 2-----")
+      
+      
+      maxCount <- max(countyData$Count, na.rm = TRUE)
+      
+      if (maxCount <= 100)
+        bins <- c(0, 1, 2, 5, 10, 20, 50, 100, Inf)
+      else if (maxCount <= 1000)
+        bins <- c(0, 10, 20, 50, 100, 200, 500, 1000, Inf)
+      else
+        bins <- c(0, maxCount * 0.01, maxCount * 0.02, maxCount * 0.05, maxCount * 0.1, maxCount * 0.2, maxCount * 0.5, maxCount * 0.7, maxCount)
+      
+      pal <- colorBin("OrRd", domain = countyData$Count, bins = bins, na.color = "#99999955")
+      
+      #message("-----OBSERVE 1 BP 3-----")
+      
+      if (maxCount > 1000000)
+      {
+        popupData <- paste0("<strong>County: </strong>", 
+                            countyData$NAME, 
+                            "<br><strong>Count: </strong>", 
+                            countyData$Count)
+      }
+      else
+      {
+        popupData <- paste0("<strong>County: </strong>", 
+                            countyData$NAME, 
+                            "<br><strong>Count: </strong>", 
+                            countyData$Count)
+      }
+      
+      #message("-----OBSERVE 1 BP LAST-----")
+      
+      
+      
+      # -----------
+      # counties
+      
+      proxy %>% addPolygons(data = countyData,
+                            fillColor = ~pal(Count), 
+                            fillOpacity = 0.7, 
+                            color = "#333333", 
+                            weight = 2,
+                            popup = popupData,
+                            popupOptions = popupOptions(style = list(
+                              "width" = "500px",
+                              "padding" = "10px",
+                              "font-size" = "36px"
+                            )),
+                            highlightOptions = highlightOptions(color = "black", weight = 4, bringToFront = FALSE),
+                            group = "Counties")
+      
+      #proxy %>% hideGroup("Counties")
+      
+      # -----------
+      
+      
+      #message("-----OBSERVE 1 END-----")
+    }
+    
+    #message("-----OBSERVE 1 START-----")
+    # track data
+    #mapData = state1_map_track_data()
+    
+    mapData <- filter(allTornadoes, st == getState2(), yr == getYearAsNum(), mag %in% getMagnitudes())
+    #mapData <- filter(mapData, mag %in% getMagnitudes())
+    #mapData <- filter(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    colnames(mapData)[8] <- "STUSPS"
+    stateSelected <- subset(states, STUSPS == getState2())
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    #mapData <- subset(mapData, STUSPS == getState1())
+    
+    
+    mapData <- subset(mapData, wid >= getWidthLower() & wid <= getWidthUpper())
+    mapData <- subset(mapData, len >= getLengthLower() & len <= getLengthUpper())
+    mapData <- subset(mapData, inj >= getInjuriesLower() & inj <= getInjuriesUpper())
+    mapData <- subset(mapData, fat >= getFatalitiesLower() & fat <= getFatalitiesUpper())
+    mapData <- subset(mapData, loss_updated >= getLossLower() & loss_updated <= getLossUpper())
+    
+    
+    # -----------
+    
+    #else
+    #    palColorTracks <- colorBin("#8a49bc", 1)
+    
+    # -----------
+    
+    
+    lat_start <- mapData@data$slat
+    lat_end <- mapData@data$elat
+    
+    lon_start <- mapData@data$slon
+    lon_end <- mapData@data$elon
+    
+    #state <- toString(mapData@data$STUSPS[1])
+    
+    # ---- color mapping
+    mappings <- getTrackMappings()
+    
+    basedOnColor <- input$basedOn1_Select
+    
+    if ("Color" %in% mappings) {
+      
+      if (basedOnColor == "Magnitude") {
+        palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
+        mapData@data$dataToMap <- mapData@data$mag
+      }
+      else if (basedOnColor == "Width") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+        mapData@data$dataToMap <- mapData@data$wid
+      }
+      else if (basedOnColor == "Length") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+        mapData@data$dataToMap <- mapData@data$len
+      }
+      else if (basedOnColor == "Injuries") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+        mapData@data$dataToMap <- mapData@data$inj
+      }
+      else if (basedOnColor == "Fatalities") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+        mapData@data$dataToMap <- mapData@data$fat
+      }
+      else if (basedOnColor == "Loss") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+        mapData@data$dataToMap <- mapData@data$loss_updated
+      }
+      
+    }else {
+      palColorTracks <- colorBin("#8a49bc", 1)
+      mapData@data$dataToMap <- rep(1, nrow(mapData@data))
+    }
+    
+    
+    basedOnWidth <- input$basedOn2_Select
+    
+    
+    # 
+    if (length(lat_start) > 0 && !is.na(lat_start)) {
+      for(i in 1:length(lat_start)){
+        
+        if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+          
+          # default width: 15
+          proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
+                                lng = c(lon_start[i],lon_end[i]),
+                                weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
+                                label = paste("TRACK"),
+                                labelOptions = labelOptions(style = list(
+                                  "padding" = "10px",
+                                  "font-size" = "32px"
+                                ))
+          )
+          
+        }
+      }
+    }
+    
+    # default radius: 4000
+    proxy %>%
+      # start
+      addCircles(
+        lng = ~mapData@data$slon,
+        lat = ~mapData@data$slat,
+        weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+        popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                       "<br><strong>Time: </strong></b>", mapData@data$time,
+                       "<br></b>",
+                       "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                       "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                       "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                       "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                       "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                       "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+        ),
+        popupOptions = popupOptions(style = list(
+          "width" = "500px",
+          "padding" = "10px",
+          "font-size" = "36px"
+        )),
+        label = paste("START"),
+        labelOptions = labelOptions(style = list(
+          "padding" = "10px",
+          "font-size" = "32px"
+        )), group = "Tracks") %>%
+      # end
+      addCircles(
+        lng = ~mapData@data$elon,
+        lat = ~mapData@data$elat,
+        weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+        color = ~palColorTracks(mapData@data$dataToMap),
+        popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                       "<br><strong>Time: </strong></b>", mapData@data$time,
+                       "<br></b>",
+                       "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                       "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                       "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                       "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                       "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                       "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+        ),
+        popupOptions = popupOptions(style = list(
+          "width" = "500px",
+          "padding" = "10px",
+          "font-size" = "36px"
+        )),
+        label = paste("END"),
+        labelOptions = labelOptions(style = list(
+          "padding" = "10px",
+          "font-size" = "32px"
+        )), group = "Tracks")
+    
+    # -----------
+    
+    
   })
   
   # ------------
@@ -798,21 +1173,26 @@ server <- function(input, output, session) {
   
   #outputOptions(output,"c9_state1_map",suspendWhenHidden=FALSE) # causes errors in console? don't use?
   
-  # c9 state 2 leaflet
-  output$c9_state2_map <- renderLeaflet({ # initialize map to default dropdown state value
-    
-    m <- leaflet(states, options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
-      setView(lng = (-87.4 + -91.6) / 2.0, lat = (36.7 + 42.6) / 2.0, zoom = 8) %>%
-      #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
-      setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
-      addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
-                       options = providerTileOptions(noWrap = TRUE)) #%>% addMeasure()
-    
-    m %>% addPolygons(weight = 5, opacity = 1, color = "black", fillOpacity = .1)
-  })
+  # # c9 state 2 leaflet
+  # output$c9_state2_map <- renderLeaflet({ # initialize map to default dropdown state value
+  #   
+  #   m <- leaflet(states, options = leafletOptions(minZoom = 7, maxZoom = 16)) %>%
+  #     setView(lng = (-87.4 + -91.6) / 2.0, lat = (36.7 + 42.6) / 2.0, zoom = 8) %>%
+  #     #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
+  #     setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
+  #     addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
+  #                      options = providerTileOptions(noWrap = TRUE)) #%>% addMeasure()
+  #   
+  #   m %>% addPolygons(weight = 5, opacity = 1, color = "black", fillOpacity = .1)
+  # })
+  # 
   
   # overview leaflet
   output$overview_map <- renderLeaflet({ 
+    
+    #activeState1 <- filter(stateBounds, STUSPS == "IL")
+    #activeState2 <- filter(stateBounds, STUSPS == "KS")
+    
     
     m <- leaflet(states, options = leafletOptions(minZoom = 6, maxZoom = 16)) %>%
       setView(lng = -96, lat = 37.8, zoom = 6) %>%
@@ -833,7 +1213,25 @@ server <- function(input, output, session) {
                      completedColor = "#3D535D")
     
     m %>% addPolygons(weight = 5, opacity = .5, color = "black", fillOpacity = .1)
+    
+    #m %>% addPolygons(data = activeState1, weight = 10, opacity = 1, color = "white", fillOpacity = 0.0, fillColor = "black")
+    #m %>% addPolygons(data = activeState2, weight = 10, opacity = 1, color = "white", fillOpacity = 0.0, fillColor = "black")
   })
+  
+  # observe({ # select active states
+  #   
+  #   # get map and clear shapes
+  #   proxy <- leafletProxy("overview_map", data = mapData) %>% clearShapes()
+  #   
+  #   activeState <- subset(states, STUSPS == getState1())
+  #   
+  #   # outline of all states
+  #   proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.2, fillColor = "black")
+  #   
+  #   # active state outline and fill
+  #   proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
+  #   
+  # })
   
   #-----------------------
   
