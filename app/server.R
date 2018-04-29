@@ -911,11 +911,11 @@ server <- function(input, output, session) {
     mutate(Percent = (Count / sum(Count) * 100))
     County <- sprintf("%03d",stateFips$FIPS.County)
     stateFips <- cbind(County, stateFips)
-    
-    #c8 <- c8 %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
+
+    #c8$ <- c8$ %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
     c8$State   <- stateFips$State[match(c8$FIPS, stateFips$FIPS.State)] 
     c8$County  <- stateFips$County.Name[match(c8$f1, stateFips$County)] 
-    c8  <- na.omit(c8)
+    c8         <- na.omit(c8)
     c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
     c8$Percent <- paste0(c8$Percent, "%")
       
@@ -925,7 +925,7 @@ server <- function(input, output, session) {
   c8DataByState <- function(state)
   {
     c8 <- allTornadoes %>% dplyr::filter(st == state) %>%
-      group_by(FIPS = stf, f1=f1) %>% 
+      group_by(FIPS = stf, f1=f1, f2=f2, f3=f3, f4=f4) %>% 
       summarise(Count = n()) %>% 
       mutate(Percent = (Count / sum(Count) * 100))
     County <- sprintf("%03d",stateFips$FIPS.County)
@@ -934,7 +934,7 @@ server <- function(input, output, session) {
     #c8 <- c8 %>% filter(f1 %in% stateCounties$COUNTYFP | f2 %in% stateCounties$COUNTYFP | f3 %in% stateCounties$COUNTYFP | f4 %in% stateCounties$COUNTYFP)
     c8$State   <- stateFips$State[match(c8$FIPS, stateFips$FIPS.State)] 
     c8$County  <- stateFips$County.Name[match(c8$f1, stateFips$County)] 
-    c8  <- na.omit(c8)
+    c8         <- na.omit(c8)
     c8$Percent <- format(round(c8$Percent, 2), nsmall = 2)
     c8$Percent <- paste0(c8$Percent, "%")
     
@@ -1447,15 +1447,16 @@ server <- function(input, output, session) {
     output$c8_state1 <- renderPlotly({
     
     c8 <- c8DataByState(getState1())
+    # Limit to top 10 for space of graph
+    c8 <- c8[order(-c8$Count), ][1:10,]
     
     ggplotly(ggplot(c8, aes(x = County,
                             y = Count,
                             group = "State",
-                            fill = State,
-                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) +
+                            fill = State)) +
                geom_bar(stat = "identity") +
                plotTheme + 
-               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))%>% 
@@ -1466,15 +1467,16 @@ server <- function(input, output, session) {
   output$c8_state2 <- renderPlotly({
     
     c8 <- c8Data(getState2())
+    # Top 15 for graph room
+    c8 <- c8[order(-c8$Count), ][1:15,]
     
     ggplotly(ggplot(c8, aes(x = County,
                             y = Count,
                             group = "State",
-                            fill = State,
-                            text = paste0("Tornadoes: ", Count, " (", Percent, ")"))) +
+                            fill = State )) +
                geom_bar(stat = "identity") +
                plotTheme + 
-               scale_fill_brewer(type = "seq"), tooltip = c("x", "text", "fill")) %>%
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))%>% 
