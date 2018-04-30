@@ -2282,10 +2282,12 @@ server <- function(input, output, session) {
                             text = paste0(variable, ": ", value))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
-               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c5_state2 <- renderPlotly({
@@ -2300,10 +2302,12 @@ server <- function(input, output, session) {
                             text = paste0(variable, ": ", value))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
-               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   #C5 Table Output | State 1 & 2
@@ -2351,10 +2355,12 @@ server <- function(input, output, session) {
                             text = paste0(variable, ": ", value))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
-               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c6_state2 <- renderPlotly({
@@ -2368,10 +2374,12 @@ server <- function(input, output, session) {
                             text = paste0(variable, ": ", value))) + 
                geom_bar(stat = "identity") + 
                plotTheme + 
-               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   #C6 Table Output | State 1 & 2
@@ -2451,10 +2459,12 @@ server <- function(input, output, session) {
                geom_bar(stat = "identity") + 
                plotTheme + 
                theme(axis.text.x = element_text(angle = 30)) +
-               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c7_state2 <- renderPlotly({
@@ -2468,10 +2478,12 @@ server <- function(input, output, session) {
                geom_bar(stat = "identity") + 
                plotTheme + 
                theme(axis.text.x = element_text(angle = 30)) +
-               scale_fill_brewer(type = "qual"), tooltip = c("x", "text")) %>%
+               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE))
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   #C8 | Table and chart showing which counties were most hit by tornadoes summed over all years
@@ -2553,7 +2565,7 @@ server <- function(input, output, session) {
                             fill = State)) +
                geom_bar(stat = "identity") +
                plotTheme + 
-               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+               scale_fill_brewer(type = "qual", palette = "Set1"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))%>% 
@@ -2573,7 +2585,7 @@ server <- function(input, output, session) {
                             fill = State )) +
                geom_bar(stat = "identity") +
                plotTheme + 
-               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+               scale_fill_brewer(type = "qual", palette = "Set1"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))%>% 
