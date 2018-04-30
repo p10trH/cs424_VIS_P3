@@ -450,7 +450,7 @@ server <- function(input, output, session) {
     #message("-------OBSERVE 2 END-------")
   })
   
-
+  
   
   # c9 state 1 leaflet
   observe({ # render track data, counties
@@ -600,7 +600,7 @@ server <- function(input, output, session) {
     #mapData = state1_map_track_data()
     
     
-
+    
     
     
     lat_start <- mapData@data$slat
@@ -642,7 +642,7 @@ server <- function(input, output, session) {
         palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
         mapData@data$dataToMap <- mapData@data$loss_updated
       }
-  
+      
     }else {
       palColorTracks <- colorBin("#8a49bc", 1)
       mapData@data$dataToMap <- rep(1, nrow(mapData@data))
@@ -651,24 +651,24 @@ server <- function(input, output, session) {
     
     basedOnWidth <- input$basedOn2_Select
     
- 
+    
     # 
     if (length(lat_start) > 0 && !is.na(lat_start)) {
       for(i in 1:length(lat_start)){
         
         if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
           
-                  # default width: 15
-                  proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
-                                        lng = c(lon_start[i],lon_end[i]),
-                                        weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
-                                        label = paste("TRACK"),
-                                        labelOptions = labelOptions(style = list(
-                                          "padding" = "10px",
-                                          "font-size" = "32px"
-                                        ))
-                  )
-   
+          # default width: 15
+          proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
+                                lng = c(lon_start[i],lon_end[i]),
+                                weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
+                                label = paste("TRACK"),
+                                labelOptions = labelOptions(style = list(
+                                  "padding" = "10px",
+                                  "font-size" = "32px"
+                                ))
+          )
+          
         }
       }
     }
@@ -729,7 +729,7 @@ server <- function(input, output, session) {
     
     # -----------
     
-
+    
   })
   
   # c9 state 2 leaflet
@@ -872,8 +872,8 @@ server <- function(input, output, session) {
     # track data
     #mapData = state1_map_track_data()
     
-
-
+    
+    
     
     lat_start <- mapData@data$slat
     lat_end <- mapData@data$elat
@@ -1010,69 +1010,69 @@ server <- function(input, output, session) {
     
     if (flagType == "weight") {
       
-        if ("Size" %in% mappings) {
+      if ("Size" %in% mappings) {
+        
+        if (basedOnWidth == "Magnitude") {
+          #palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
+          #mapData@data$dataToMap <- mapData@data$mag
           
-          if (basedOnWidth == "Magnitude") {
-            #palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
-            #mapData@data$dataToMap <- mapData@data$mag
-            
-            value <- mapData@data$mag[i]
-            
-            oldLowerB <- 0
-            oldUpperB <- 5
-            
-          }
-          else if (basedOnWidth == "Width") {
-            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
-            #mapData@data$dataToMap <- mapData@data$wid
-            
-            value <- mapData@data$wid[i]
-            
-            oldLowerB <- getWidthLower()
-            oldUpperB <- getWidthUpper()
-          }
-          else if (basedOnWidth == "Length") {
-            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
-            #mapData@data$dataToMap <- mapData@data$len
-            
-            value <- mapData@data$len[i]
-            
-            oldLowerB <- getLengthLower()
-            oldUpperB <- getLengthUpper()
-          }
-          else if (basedOnWidth == "Injuries") {
-            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
-            #mapData@data$dataToMap <- mapData@data$inj
-            
-            value <- mapData@data$inj[i]
-            
-            oldLowerB <- getInjuriesLower()
-            oldUpperB <- getInjuriesUpper()
-          }
-          else if (basedOnWidth == "Fatalities") {
-            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
-            #mapData@data$dataToMap <- mapData@data$fat
-            
-            value <- mapData@data$fat[i]
-            
-            oldLowerB <- getFatalitiesLower()
-            oldUpperB <- getFatalitiesUpper()
-          }
-          else if (basedOnWidth == "Loss") {
-            #palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
-            #mapData@data$dataToMap <- mapData@data$loss_updated
-            
-            value <- mapData@data$loss_updated[i]
-           
-            oldLowerB <- getLossLower()
-            oldUpperB <- getLossUpper() 
-          }
+          value <- mapData@data$mag[i]
           
-        } else {
-            return(15)
+          oldLowerB <- 0
+          oldUpperB <- 5
+          
+        }
+        else if (basedOnWidth == "Width") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+          #mapData@data$dataToMap <- mapData@data$wid
+          
+          value <- mapData@data$wid[i]
+          
+          oldLowerB <- getWidthLower()
+          oldUpperB <- getWidthUpper()
+        }
+        else if (basedOnWidth == "Length") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+          #mapData@data$dataToMap <- mapData@data$len
+          
+          value <- mapData@data$len[i]
+          
+          oldLowerB <- getLengthLower()
+          oldUpperB <- getLengthUpper()
+        }
+        else if (basedOnWidth == "Injuries") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+          #mapData@data$dataToMap <- mapData@data$inj
+          
+          value <- mapData@data$inj[i]
+          
+          oldLowerB <- getInjuriesLower()
+          oldUpperB <- getInjuriesUpper()
+        }
+        else if (basedOnWidth == "Fatalities") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+          #mapData@data$dataToMap <- mapData@data$fat
+          
+          value <- mapData@data$fat[i]
+          
+          oldLowerB <- getFatalitiesLower()
+          oldUpperB <- getFatalitiesUpper()
+        }
+        else if (basedOnWidth == "Loss") {
+          #palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+          #mapData@data$dataToMap <- mapData@data$loss_updated
+          
+          value <- mapData@data$loss_updated[i]
+          
+          oldLowerB <- getLossLower()
+          oldUpperB <- getLossUpper() 
         }
         
-        return ( (value - oldLowerB)*((newUpperB - newLowerB)/(oldUpperB - oldLowerB)) + newLowerB  )
+      } else {
+        return(15)
+      }
+      
+      return ( (value - oldLowerB)*((newUpperB - newLowerB)/(oldUpperB - oldLowerB)) + newLowerB  )
       
     } else {
       
@@ -1133,7 +1133,7 @@ server <- function(input, output, session) {
           oldLowerB <- getLossLower()
           oldUpperB <- getLossUpper() 
         }
-            
+        
       } else {
         
         mapData@data$dataToMap2 <- rep(4000, nrow(mapData@data))
@@ -1145,13 +1145,13 @@ server <- function(input, output, session) {
         for(j in 1:length(mapData@data$dataToMap2)){
           
           mapData@data$dataToMap2[j] <- (mapData@data$dataToMap2[j] - oldLowerB)*((newUpperB - newLowerB)/(oldUpperB - oldLowerB)) + newLowerB
-       
-             
+          
+          
         }
       }
       
       return ( mapData@data$dataToMap2  )
-    
+      
     }
     
   }
@@ -1179,7 +1179,6 @@ server <- function(input, output, session) {
     
     #activeState1 <- filter(stateBounds, STUSPS == "IL")
     #activeState2 <- filter(stateBounds, STUSPS == "KS")
-    
     
     m <- leaflet(states, options = leafletOptions(minZoom = 6, maxZoom = 16)) %>%
       setView(lng = -96, lat = 37.8, zoom = 6) %>%
@@ -1219,6 +1218,419 @@ server <- function(input, output, session) {
   #   proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
   #   
   # })
+  
+  # ALL TORNADO TRACKS PLUS MOST DESTRUCTIVE TORNAODES ON SAME MAP
+  observe({ # render track data, counties
+    
+    # ALL TORNADO TRACKS ====
+    mapData <- allTornadoes %>% dplyr::filter(yr == getYearAsNum())
+    
+    colnames(mapData)[8] <- "STUSPS"
+    
+    stateSelected <- subset(states, STUSPS %in% mapData$STUSPS)
+    
+    mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+    
+    # get map and clear shapes
+    proxy <- leafletProxy("overview_map", data = mapData) %>% clearShapes()
+    
+    activeState <- subset(states, STUSPS == getState1() | STUSPS == getState2())
+    
+    # outline of all states
+    proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.2, fillColor = "black")
+    
+    # active state outline and fill
+    proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
+    
+    
+    lat_start <- mapData@data$slat
+    lat_end <- mapData@data$elat
+    
+    lon_start <- mapData@data$slon
+    lon_end <- mapData@data$elon
+    
+    # ---- color mapping
+    mappings <- getTrackMappings()
+    
+    basedOnColor <- input$basedOn1_Select
+    
+    if ("Color" %in% mappings) {
+      
+      if (basedOnColor == "Magnitude") {
+        palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
+        mapData@data$dataToMap <- mapData@data$mag
+      }
+      else if (basedOnColor == "Width") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+        mapData@data$dataToMap <- mapData@data$wid
+      }
+      else if (basedOnColor == "Length") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+        mapData@data$dataToMap <- mapData@data$len
+      }
+      else if (basedOnColor == "Injuries") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+        mapData@data$dataToMap <- mapData@data$inj
+      }
+      else if (basedOnColor == "Fatalities") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+        mapData@data$dataToMap <- mapData@data$fat
+      }
+      else if (basedOnColor == "Loss") {
+        palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+        mapData@data$dataToMap <- mapData@data$loss_updated
+      }
+      
+    }
+    else {
+      palColorTracks <- colorBin("#8a49bc", 1)
+      mapData@data$dataToMap <- rep(1, nrow(mapData@data))
+    }
+    
+    
+    basedOnWidth <- input$basedOn2_Select
+    
+    
+    #
+    if (length(lat_start) > 0 && !is.na(lat_start)) {
+      for(i in 1:length(lat_start)){
+        
+        if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+          
+          # default width: 15
+          proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
+                                lng = c(lon_start[i],lon_end[i]),
+                                weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
+                                label = paste("TRACK"),
+                                labelOptions = labelOptions(style = list(
+                                  "padding" = "10px",
+                                  "font-size" = "32px"
+                                ))
+          )
+          
+        }
+      }
+    }
+    
+    # default radius: 4000
+    proxy %>%
+      # start
+      addCircles(
+        lng = ~mapData@data$slon,
+        lat = ~mapData@data$slat,
+        weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+        popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                       "<br><strong>Time: </strong></b>", mapData@data$time,
+                       "<br></b>",
+                       "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                       "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                       "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                       "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                       "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                       "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+        ),
+        popupOptions = popupOptions(style = list(
+          "width" = "500px",
+          "padding" = "10px",
+          "font-size" = "36px"
+        )),
+        label = paste("START"),
+        labelOptions = labelOptions(style = list(
+          "padding" = "10px",
+          "font-size" = "32px"
+        )), group = "Tracks") %>%
+      # end
+      addCircles(
+        lng = ~mapData@data$elon,
+        lat = ~mapData@data$elat,
+        weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+        color = ~palColorTracks(mapData@data$dataToMap),
+        popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                       "<br><strong>Time: </strong></b>", mapData@data$time,
+                       "<br></b>",
+                       "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                       "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                       "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                       "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                       "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                       "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+        ),
+        popupOptions = popupOptions(style = list(
+          "width" = "500px",
+          "padding" = "10px",
+          "font-size" = "36px"
+        )),
+        label = paste("END"),
+        labelOptions = labelOptions(style = list(
+          "padding" = "10px",
+          "font-size" = "32px"
+        )), group = "Tracks")
+    
+    # -----------
+    
+    # MOST DESTRUCTIVE TORNADO TRACKS
+    if (!("Color" %in% mappings | "Size" %in% mappings))
+    {
+      state1Tornaodes <- getMostDestructiveTornadoes(getState1())
+      state2Tornaodes <- getMostDestructiveTornadoes(getState2())
+      
+      mapData <- rbind(state1Tornaodes, state2Tornaodes)
+      
+      colnames(mapData)[8] <- "STUSPS"
+      
+      stateSelected <- subset(states, STUSPS == getState1() | STUSPS == getState2())
+      
+      mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+      
+      activeState <- subset(states, STUSPS == getState1() | STUSPS == getState2())
+      
+      # active state outline and fill
+      proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
+      
+      palColorTracks <- colorBin("#56ffc1", 1)
+      mapData@data$dataToMap <- rep(1, nrow(mapData@data))
+      
+      lat_start <- mapData@data$slat
+      lat_end <- mapData@data$elat
+      
+      lon_start <- mapData@data$slon
+      lon_end <- mapData@data$elon
+      
+      if (length(lat_start) > 0 && !is.na(lat_start)) {
+        for(i in 1:length(lat_start)){
+          
+          if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+            
+            # default width: 15
+            proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
+                                  lng = c(lon_start[i],lon_end[i]),
+                                  weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
+                                  label = paste("TRACK"),
+                                  labelOptions = labelOptions(style = list(
+                                    "padding" = "10px",
+                                    "font-size" = "32px"
+                                  ))
+            )
+            
+          }
+        }
+      }
+      
+      # default radius: 4000
+      proxy %>%
+        # start
+        addCircles(
+          lng = ~mapData@data$slon,
+          lat = ~mapData@data$slat,
+          weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+          popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                         "<br><strong>Time: </strong></b>", mapData@data$time,
+                         "<br></b>",
+                         "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                         "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                         "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                         "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                         "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                         "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+          ),
+          popupOptions = popupOptions(style = list(
+            "width" = "500px",
+            "padding" = "10px",
+            "font-size" = "36px"
+          )),
+          label = paste("START"),
+          labelOptions = labelOptions(style = list(
+            "padding" = "10px",
+            "font-size" = "32px"
+          )), group = "Tracks") %>%
+        # end
+        addCircles(
+          lng = ~mapData@data$elon,
+          lat = ~mapData@data$elat,
+          weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+          color = ~palColorTracks(mapData@data$dataToMap),
+          popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+                         "<br><strong>Time: </strong></b>", mapData@data$time,
+                         "<br></b>",
+                         "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+                         "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+                         "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+                         "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+                         "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+                         "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+          ),
+          popupOptions = popupOptions(style = list(
+            "width" = "500px",
+            "padding" = "10px",
+            "font-size" = "36px"
+          )),
+          label = paste("END"),
+          labelOptions = labelOptions(style = list(
+            "padding" = "10px",
+            "font-size" = "32px"
+          )), group = "Tracks")
+      
+      
+    }
+    
+  })
+  
+  # # MOST DESTRUCTIVE TORNADO MAP
+  # observe({ # render track data, counties
+  # 
+  #   # Get most destructive tornadoes for both states
+  #   state1Tornaodes <- getMostDestructiveTornadoes(getState1())
+  #   state2Tornaodes <- getMostDestructiveTornadoes(getState2())
+  # 
+  #   mapData <- rbind(state1Tornaodes, state2Tornaodes)
+  # 
+  #   colnames(mapData)[8] <- "STUSPS"
+  # 
+  #   stateSelected <- subset(states, STUSPS == getState1() | STUSPS == getState2())
+  # 
+  #   mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
+  # 
+  #   # get map and clear shapes
+  #   proxy <- leafletProxy("overview_map", data = mapData) %>% clearShapes()
+  # 
+  #   activeState <- subset(states, STUSPS == getState1() | STUSPS == getState2())
+  # 
+  #   # outline of all states
+  #   proxy %>% addPolygons(data = states, weight = 3, opacity = .5, color = "black", fillOpacity = 0.2, fillColor = "black")
+  # 
+  #   # active state outline and fill
+  #   proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
+  # 
+  #   # ----
+  #   lat_start <- mapData@data$slat
+  #   lat_end <- mapData@data$elat
+  # 
+  #   lon_start <- mapData@data$slon
+  #   lon_end <- mapData@data$elon
+  # 
+  #   # ---- color mapping
+  #   mappings <- getTrackMappings()
+  # 
+  #   basedOnColor <- input$basedOn1_Select
+  # 
+  #   if ("Color" %in% mappings) {
+  # 
+  #     if (basedOnColor == "Magnitude") {
+  #       palColorTracks <- colorBin(palette = c('#eff3ff','#c6dbef','#9ecae1','#6baed6','#3182bd','#08519c'), domain = c(0,6))
+  #       mapData@data$dataToMap <- mapData@data$mag
+  #     }
+  #     else if (basedOnColor == "Width") {
+  #       palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getWidthLower(),getWidthUpper()))
+  #       mapData@data$dataToMap <- mapData@data$wid
+  #     }
+  #     else if (basedOnColor == "Length") {
+  #       palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getLengthLower(),getLengthUpper()))
+  #       mapData@data$dataToMap <- mapData@data$len
+  #     }
+  #     else if (basedOnColor == "Injuries") {
+  #       palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getInjuriesLower(),getInjuriesUpper()))
+  #       mapData@data$dataToMap <- mapData@data$inj
+  #     }
+  #     else if (basedOnColor == "Fatalities") {
+  #       palColorTracks <- colorNumeric(palette = brewer.pal(7, "GnBu"), domain = c(getFatalitiesLower(),getFatalitiesUpper()))
+  #       mapData@data$dataToMap <- mapData@data$fat
+  #     }
+  #     else if (basedOnColor == "Loss") {
+  #       palColorTracks <- colorNumeric(palette = brewer.pal(7, "Greens"), domain = c(getLossLower(),getLossUpper()))
+  #       mapData@data$dataToMap <- mapData@data$loss_updated
+  #     }
+  # 
+  #   }
+  #   else {
+  #     palColorTracks <- colorBin("#56ffc1", 1)
+  #     mapData@data$dataToMap <- rep(1, nrow(mapData@data))
+  #   }
+  # 
+  # 
+  #   basedOnWidth <- input$basedOn2_Select
+  # 
+  # 
+  #   #
+  #   if (length(lat_start) > 0 && !is.na(lat_start)) {
+  #     for(i in 1:length(lat_start)){
+  # 
+  #       if ((!(lat_start[i] == 0.0 | lat_end[i] == 0.0 | lon_start[i] == 0.0 | lon_end[i] == 0.0))) {
+  # 
+  #         # default width: 15
+  #         proxy <- addPolylines(data = mapData, proxy, lat = c(lat_start[i],lat_end[i]),
+  #                               lng = c(lon_start[i],lon_end[i]),
+  #                               weight = mapTrackWidth(mappings, basedOnWidth, i, mapData, 10, 55, "weight"), opacity = 0.85, color = ~palColorTracks(mapData@data$dataToMap[i]), group = "Tracks",
+  #                               label = paste("TRACK"),
+  #                               labelOptions = labelOptions(style = list(
+  #                                 "padding" = "10px",
+  #                                 "font-size" = "32px"
+  #                               ))
+  #         )
+  # 
+  #       }
+  #     }
+  #   }
+  # 
+  #   # default radius: 4000
+  #   proxy %>%
+  #     # start
+  #     addCircles(
+  #       lng = ~mapData@data$slon,
+  #       lat = ~mapData@data$slat,
+  #       weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+  #       popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+  #                      "<br><strong>Time: </strong></b>", mapData@data$time,
+  #                      "<br></b>",
+  #                      "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+  #                      "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+  #                      "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+  #                      "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+  #                      "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+  #                      "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+  #       ),
+  #       popupOptions = popupOptions(style = list(
+  #         "width" = "500px",
+  #         "padding" = "10px",
+  #         "font-size" = "36px"
+  #       )),
+  #       label = paste("START"),
+  #       labelOptions = labelOptions(style = list(
+  #         "padding" = "10px",
+  #         "font-size" = "32px"
+  #       )), group = "Tracks") %>%
+  #     # end
+  #     addCircles(
+  #       lng = ~mapData@data$elon,
+  #       lat = ~mapData@data$elat,
+  #       weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+  #       color = ~palColorTracks(mapData@data$dataToMap),
+  #       popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
+  #                      "<br><strong>Time: </strong></b>", mapData@data$time,
+  #                      "<br></b>",
+  #                      "<br><strong>Magnitude   : </strong></b>", mapData@data$mag,
+  #                      "<br><strong>Width (yds) : </strong></b>", mapData@data$wid,
+  #                      "<br><strong>Length (mi) : </strong></b>", mapData@data$len,
+  #                      "<br><strong>Injuries    : </strong></b>", mapData@data$inj,
+  #                      "<br><strong>Fatalities  : </strong></b>", mapData@data$fat,
+  #                      "<br><strong>Loss ($)    : </strong></b>", (mapData@data$loss_updated/1000000.0), " million"
+  #       ),
+  #       popupOptions = popupOptions(style = list(
+  #         "width" = "500px",
+  #         "padding" = "10px",
+  #         "font-size" = "36px"
+  #       )),
+  #       label = paste("END"),
+  #       labelOptions = labelOptions(style = list(
+  #         "padding" = "10px",
+  #         "font-size" = "32px"
+  #       )), group = "Tracks")
+  # 
+  #   # -----------
+  # 
+  # 
+  # })
+  
+  
   
   #-----------------------
   
