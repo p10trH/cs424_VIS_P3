@@ -491,7 +491,7 @@ ui <- fluidPage(
                            fluidRow(column(12, align = "left", h2("Counties show:"))),
                            br(),
                            fluidRow(column(10, offset = 1, align = "justify",selectInput("counties_Select", label = NULL,
-                                                                                      c("Tornadoes (magnitude)", "Fatalities", "Injuries", "Loss"), 
+                                                                                      c("Tornadoes (magnitude)", "Fatalities", "Injuries", "Loss", "Safety"), 
                                                                                       selected = 1)    )
                            )
                            
