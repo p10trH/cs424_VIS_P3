@@ -1182,6 +1182,7 @@ server <- function(input, output, session) {
     
     m <- leaflet(states, options = leafletOptions(minZoom = 6, maxZoom = 16)) %>%
       setView(lng = -96, lat = 37.8, zoom = 6) %>%
+      setMaxBounds(-65, 20, -135, 50) %>%
       #fitBounds(-87.4, 36.7, -91.6, 42.6) %>%
       #setMaxBounds(-87.4, 36.7, -91.6, 42.6) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron

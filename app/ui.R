@@ -72,13 +72,13 @@ ui <- fluidPage(
                               
                               wellPanel(
                                 fluidRow(column(12, align = "left",
-                                                tags$style(type = "text/css", "#c1_state1_table {min-height:30vh !important;}"),
+                                                tags$style(type = "text/css", "#c1_state1_table {color: black; min-height:30vh !important;}"),
                                                 DTOutput("b4_state1_table"))
                                 )),
                               
                               wellPanel(
                                 fluidRow(column(12, align = "left",
-                                                tags$style(type = "text/css", "#c1_state1_table {min-height:30vh !important;}"),
+                                                tags$style(type = "text/css", "#c1_state1_table {color: black;min-height:30vh !important;}"),
                                                 DTOutput("b4_state2_table"))
                                 ))
                               
