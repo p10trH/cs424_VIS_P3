@@ -499,6 +499,10 @@ server <- function(input, output, session) {
     else if (dataType == "Loss") {
       countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
     }
+    else if (dataType == "Safety")
+    {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
+    }
     
     # ----
     mapData <- filter(allTornadoes, st == getState1(), yr == getYearAsNum(), mag %in% getMagnitudes())
@@ -769,6 +773,10 @@ server <- function(input, output, session) {
       countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(inj))
     }
     else if (dataType == "Loss") {
+      countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
+    }
+    else if (dataType == "Safety")
+    {
       countyData <- magStateCountyData%>% dplyr::group_by(COUNTYFP = f1) %>% summarise(Count = sum(loss_updated))
     }
     
@@ -1900,8 +1908,9 @@ server <- function(input, output, session) {
       hours24 <- as.data.frame(c("00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"))
       
       c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:00")) %>% 
-        dplyr::summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated)) 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%H:00"), Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
+        dplyr::summarise(Count = n()) %>% 
+        dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
       c7$Hour <- ordered(c7$Hour, levels = hours24[,])
     }
@@ -1910,13 +1919,17 @@ server <- function(input, output, session) {
       hours12 <- as.data.frame(c("12:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"))
       
       c7 <- allTornadoes %>% dplyr::filter(st == state) %>%
-        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:00 %p")) %>% 
-        dplyr::summarise(Injury = sum(inj), Fatality = sum(fat), Loss = sum(loss_updated)) 
+        dplyr::group_by(Hour = format(strptime(time, "%H:%M:%S"), format="%I:00 %p"), Injury = inj, Fatality = fat, Loss = loss_updated) %>% 
+        dplyr::summarise(Count = n()) %>% 
+        dplyr::mutate(Percent = (Count / sum(Count) * 100))
       
       c7$Hour <- ordered(c7$Hour, levels = hours12[,])
     }
     
-    c7$Loss <- c7$Loss / 1000000
+    c7$Percent <- format(round(c7$Percent, 2), nsmall = 2)
+    c7$Percent <- paste0(c7$Percent, "%")
+    
+    c7 <- dplyr::arrange(c7, Hour, Injury, Fatality, Loss)
     
     return(c7)
   }
@@ -2275,15 +2288,15 @@ server <- function(input, output, session) {
     
     c5 <- c5Data(getState1())
     
-    c5 <- reshape2::melt(c5, id.vars = "Year")
-    
-    ggplotly(ggplot(c5, aes(x = Year, 
-                            y = value, 
-                            fill = variable,
-                            text = paste0(variable, ": ", value))) + 
-               geom_bar(stat = "identity") + 
+    ggplotly(ggplot(c5, aes(Year)) + guides(fill=FALSE) + 
+               geom_line(aes(y = Injury, color="Injury", size='qsec')) + 
+               geom_line(aes(y = Fatality, color="Fatality", size='qsec')) + 
+               #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
-               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
+               guides(fill=FALSE) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE)) %>%
@@ -2295,15 +2308,48 @@ server <- function(input, output, session) {
     
     c5 <- c5Data(getState2())
     
-    c5 <- reshape2::melt(c5, id.vars = "Year")
+    ggplotly(ggplot(c5, aes(Year)) +
+               geom_line(aes(y = Injury, color="Injury", size='qsec')) + 
+               geom_line(aes(y = Fatality, color="Fatality", size='qsec')) + 
+               #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
+               plotTheme +
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
+  output$c5_state1Loss <- renderPlotly({
     
-    ggplotly(ggplot(c5, aes(x = Year, 
-                            y = value, 
-                            fill = variable,
-                            text = paste0(variable, ": ", value))) + 
-               geom_bar(stat = "identity") + 
-               plotTheme + 
-               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
+    c5 <- c5Data(getState1())
+    
+    ggplotly(ggplot(c5, aes(Year)) +
+               geom_line(aes(y = Loss, color="Loss", size='qsec')) +
+               plotTheme +
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
+               scale_color_manual(values=c('#198C19')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
+  output$c5_state2Loss <- renderPlotly({
+    
+    c5 <- c5Data(getState2())
+    
+    ggplotly(ggplot(c5, aes(Year)) +
+               geom_line(aes(y = Loss, color="Loss", size='qsec')) +
+               plotTheme +
+               theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank()) +
+               scale_color_manual(values=c('#198C19')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE)) %>%
@@ -2347,38 +2393,46 @@ server <- function(input, output, session) {
   #c6 Chart Output | State 1 & 2
   output$c6_state1 <- renderPlotly({
     
+    # c6 <- c6Data(getState1())
+    # c6 <- reshape2::melt(c6, id.vars = "Month")
+    # 
     c6 <- c6Data(getState1())
-    c6 <- reshape2::melt(c6, id.vars = "Month")
     
-    ggplotly(ggplot(c6, aes(x = Month, 
-                            y = value, 
-                            fill = variable,
-                            text = paste0(variable, ": ", value))) + 
-               geom_bar(stat = "identity") + 
+    ggplotly(ggplot(c6, aes(Month)) +
+               geom_line(aes(y = Injury, color="Injury", size='qsec')) + 
+               geom_line(aes(y = Fatality, color="Fatality", size='qsec')) + 
+               #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
-               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
+               theme(legend.position="none", axis.title.y=element_blank()) +
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
       layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
       layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c6_state2 <- renderPlotly({
     
-    c6 <- c6Data(getState2())
-    c6 <- reshape2::melt(c6, id.vars = "Month")
+    # c6 <- c6Data(getState2())
+    # c6 <- reshape2::melt(c6, id.vars = "Month")
     
-    ggplotly(ggplot(c6, aes(x = Month, 
-                            y = value, 
-                            fill = variable,
-                            text = paste0(variable, ": ", value))) + 
-               geom_bar(stat = "identity") + 
+    c6 <- c6Data(getState2())
+    
+    ggplotly(ggplot(c6, aes(Month)) +
+               geom_line(aes(y = Injury, color="Injury", size='qsec')) + 
+               geom_line(aes(y = Fatality, color="Fatality", size='qsec')) + 
+               #geom_line(aes(y = Loss, color="Loss", text = paste0("Loss: ", Loss))) +
                plotTheme + 
-               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
+               theme(legend.position="none", axis.title.y=element_blank()) +
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
       layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
       layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
@@ -2398,6 +2452,42 @@ server <- function(input, output, session) {
       scrollY = 800,
       scroller = TRUE),
       rownames = FALSE)
+  })
+  
+  output$c6_state1Loss <- renderPlotly({
+    
+    c6 <- c6Data(getState1())
+    
+    ggplotly(ggplot(c6, aes(Month)) +
+               geom_line(aes(y = Loss, color="Loss", size='qsec')) +
+               plotTheme + 
+               theme(legend.position="none", axis.title.y=element_blank()) +
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_color_manual(values=c('#198C19')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
+  output$c6_state2Loss <- renderPlotly({
+    
+    c6 <- c6Data(getState2())
+    
+    ggplotly(ggplot(c6, aes(Month)) +
+               geom_line(aes(y = Loss, color="Loss", size='qsec')) +
+               plotTheme + 
+               theme(legend.position="none", axis.title.y=element_blank()) +
+               scale_x_continuous(breaks = round(seq(1, 12, by = 1),1)) +
+               scale_color_manual(values=c('#198C19')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c6_state2_table <- renderDT({
@@ -2450,39 +2540,75 @@ server <- function(input, output, session) {
   })
   
   output$c7_state1 <- renderPlotly({
+    # c7 <- c7Data(getState1())
+    # c7 <- reshape2::melt(c7, id.vars = "Hour")
+    # 
     c7 <- c7Data(getState1())
-    c7 <- reshape2::melt(c7, id.vars = "Hour")
     
-    ggplotly(ggplot(c7, aes(x = Hour, 
-                            y = value, 
-                            fill = variable,
-                            text = paste0(variable, ": ", value))) + 
-               geom_bar(stat = "identity") + 
+    ggplotly(ggplot(c7, aes(Hour)) +
+               geom_line(aes(y = Injury, color="Injury", size='qsec')) + 
+               geom_line(aes(y = Fatality, color="Fatality", size='qsec')) + 
                plotTheme + 
-               theme(axis.text.x = element_text(angle = 30)) +
-               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
+               theme(legend.position="none", axis.title.y=element_blank(), axis.text.x = element_text(angle = 90, hjust = 1)) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + #e69f00
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
       layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
       layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
   
   output$c7_state2 <- renderPlotly({
+    # c7 <- c7Data(getState2())
+    # c7 <- reshape2::melt(c7, id.vars = "Hour")
+    # 
     c7 <- c7Data(getState2())
-    c7 <- reshape2::melt(c7, id.vars = "Hour")
     
-    ggplotly(ggplot(c7, aes(x = Hour, 
-                            y = value, 
-                            fill = variable,
-                            text = paste0(variable, ": ", value))) + 
-               geom_bar(stat = "identity") + 
+    ggplotly(ggplot(c7, aes(Hour)) +
+               geom_line(aes(y = Injury, color="Injury", size='qsec')) + 
+               geom_line(aes(y = Fatality, color="Fatality", size='qsec')) + 
                plotTheme + 
-               theme(axis.text.x = element_text(angle = 30)) +
-               scale_fill_manual(values = c("#ff7f00", "#e41a1c", "#4daf4a")), tooltip = c("x", "text")) %>%
+               theme(legend.position="none", axis.title.y=element_blank(), axis.text.x = element_text(angle = 90, hjust = 1)) +
+               scale_color_manual(values=c('#e62c00','#e69f00', '#00e69f')) + #e69f00
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
-      layout(xaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
+  output$c7_state1Loss <- renderPlotly({
+    
+    c7 <- c7Data(getState1())
+    
+    ggplotly(ggplot(c7, aes(Hour)) +
+               geom_line(aes(y = Loss, color="Loss", size='qsec')) +
+               plotTheme + 
+               theme(legend.position="none", axis.title.y=element_blank(), axis.text.x = element_text(angle = 90, hjust = 1)) + #axis.text.y=element_blank()
+               scale_color_manual(values=c('#198C19')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+  })
+  
+  output$c7_state2Loss <- renderPlotly({
+    
+    c7 <- c7Data(getState2())
+    
+    ggplotly(ggplot(c7, aes(Hour)) +
+               geom_line(aes(y = Loss, color="Loss", size='qsec')) +
+               plotTheme + 
+               theme(legend.position="none", axis.title.y=element_blank(), axis.text.x = element_text(angle = 90, hjust = 1)) +
+               scale_color_manual(values=c('#198C19')) + 
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
+      config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE)) %>% 
       layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
       layout(paper_bgcolor='rgba(0, 0, 0, 0)')
   })
@@ -2566,7 +2692,8 @@ server <- function(input, output, session) {
                             fill = State)) +
                geom_bar(stat = "identity") +
                plotTheme + 
-               scale_fill_brewer(type = "qual", palette = "Set1"), tooltip = c("x", "y")) %>%
+               theme(axis.text.x = element_text(angle = 315, hjust = 1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))%>% 
@@ -2580,13 +2707,15 @@ server <- function(input, output, session) {
     # Top 15 for graph room
     c8 <- c8[order(-c8$Count), ][1:15,]
     
+    
     ggplotly(ggplot(c8, aes(x = County,
                             y = Count,
                             group = "State",
                             fill = State )) +
                geom_bar(stat = "identity") +
                plotTheme + 
-               scale_fill_brewer(type = "qual", palette = "Set1"), tooltip = c("x", "y")) %>%
+               theme(axis.text.x = element_text(angle = 315, hjust = 1)) +
+               scale_fill_brewer(type = "seq"), tooltip = c("x", "y")) %>%
       config(staticPlot = FALSE, displayModeBar = FALSE) %>%
       layout(yaxis = list(fixedrange = TRUE)) %>%
       layout(xaxis = list(fixedrange = TRUE))%>% 
@@ -2597,7 +2726,19 @@ server <- function(input, output, session) {
   # -----------------------------
   
   
-  
+  output$heatMap <- renderPlotly({
+    
+    heat <- heatData(getState2())
+    heat <- heat[order(-heat$score), ][1:20,]
+    ggplotly(ggplot(heat, aes(score, County)) + geom_tile(aes(fill = score), colour = "white") + 
+               scale_fill_gradient(low = "green", high = "red") + 
+               plotTheme, tooltip = c("x", "y"))  %>% config(staticPlot = FALSE, displayModeBar = FALSE) %>%
+      layout(yaxis = list(fixedrange = TRUE)) %>%
+      layout(xaxis = list(fixedrange = TRUE))%>% 
+      layout(plot_bgcolor='rgba(0, 0, 0, 0)') %>% 
+      layout(paper_bgcolor='rgba(0, 0, 0, 0)')
+    
+  })
   
   
   
