@@ -293,7 +293,7 @@ server <- function(input, output, session) {
     topB <- initState$top_bound
     
     leaflet(options = leafletOptions(minZoom = 7, maxZoom = 15)) %>%
-      setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
+      setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 9) %>%
       setMaxBounds(rightB, bottomB, leftB, topB) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
                        options = providerTileOptions(noWrap = TRUE)) %>% hideGroup("Counties")%>%
@@ -322,7 +322,7 @@ server <- function(input, output, session) {
     topB <- initState$top_bound
     
     leaflet(options = leafletOptions(minZoom = 7, maxZoom = 15)) %>%
-      setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>%
+      setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 9) %>%
       setMaxBounds(rightB, bottomB, leftB, topB) %>%
       addProviderTiles(providers$Stamen.TonerLite, # CartoDB.Positron
                        options = providerTileOptions(noWrap = TRUE)) %>% hideGroup("Counties")%>%
@@ -356,7 +356,7 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("c9_state1_map")
     
     # set view and max Bounds
-    proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>% 
+    proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 9) %>% 
       setMaxBounds(rightB, bottomB, leftB, topB)
   })
   
@@ -373,7 +373,7 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("c9_state2_map")
     
     # set view and max Bounds
-    proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 8) %>% 
+    proxy %>% setView(lng = (rightB + leftB) / 2.0, lat = (bottomB + topB) / 2.0, zoom = 9) %>% 
       setMaxBounds(rightB, bottomB, leftB, topB)
   })
   
@@ -577,6 +577,7 @@ server <- function(input, output, session) {
       # -----------
       # counties
       
+      if (input$mainNav == "Explore Further") {
       proxy %>% addPolygons(data = countyData,
                             fillColor = ~pal(Count), 
                             fillOpacity = 0.7, 
@@ -590,7 +591,7 @@ server <- function(input, output, session) {
                             )),
                             highlightOptions = highlightOptions(color = "black", weight = 4, bringToFront = FALSE),
                             group = "Counties")
-      
+      }
       #proxy %>% hideGroup("Counties")
       
       # -----------
@@ -656,6 +657,8 @@ server <- function(input, output, session) {
     basedOnWidth <- input$basedOn2_Select
     
     
+    if (input$mainNav == "Explore Further") {
+    
     # 
     if (length(lat_start) > 0 && !is.na(lat_start)) {
       for(i in 1:length(lat_start)){
@@ -683,7 +686,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
-        weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+        weight = 7, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
                        "<br></b>",
@@ -708,7 +711,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$elon,
         lat = ~mapData@data$elat,
-        weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+        weight = 10, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
         color = ~palColorTracks(mapData@data$dataToMap),
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
@@ -732,7 +735,7 @@ server <- function(input, output, session) {
         )), group = "Tracks")
     
     # -----------
-    
+    }
     
   })
   
@@ -854,6 +857,8 @@ server <- function(input, output, session) {
       # -----------
       # counties
       
+      if (input$mainNav == "Explore Further") {
+        
       proxy %>% addPolygons(data = countyData,
                             fillColor = ~pal(Count), 
                             fillOpacity = 0.7, 
@@ -867,6 +872,7 @@ server <- function(input, output, session) {
                             )),
                             highlightOptions = highlightOptions(color = "black", weight = 4, bringToFront = FALSE),
                             group = "Counties")
+      }
       
       #proxy %>% hideGroup("Counties")
       
@@ -931,7 +937,7 @@ server <- function(input, output, session) {
     
     basedOnWidth <- input$basedOn2_Select
     
-    
+    if (input$mainNav == "Explore Further") {
     # 
     if (length(lat_start) > 0 && !is.na(lat_start)) {
       for(i in 1:length(lat_start)){
@@ -959,7 +965,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
-        weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+        weight = 7, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
                        "<br></b>",
@@ -984,7 +990,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$elon,
         lat = ~mapData@data$elat,
-        weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+        weight = 10, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
         color = ~palColorTracks(mapData@data$dataToMap),
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
@@ -1008,7 +1014,7 @@ server <- function(input, output, session) {
         )), group = "Tracks")
     
     # -----------
-    
+    }
     
   })
   
@@ -1183,7 +1189,7 @@ server <- function(input, output, session) {
   # 
   
   # overview leaflet
-  output$overview_map <- renderLeaflet({ 
+  output$overview_map <- renderLeaflet({ #initialize
     
     #activeState1 <- filter(stateBounds, STUSPS == "IL")
     #activeState2 <- filter(stateBounds, STUSPS == "KS")
@@ -1211,6 +1217,14 @@ server <- function(input, output, session) {
     
     #m %>% addPolygons(data = activeState1, weight = 10, opacity = 1, color = "white", fillOpacity = 0.0, fillColor = "black")
     #m %>% addPolygons(data = activeState2, weight = 10, opacity = 1, color = "white", fillOpacity = 0.0, fillColor = "black")
+  })
+  
+  observe({ # map provider
+    
+    proxy <- leafletProxy("overview_map")
+    
+    proxy %>% clearTiles() %>% addProviderTiles(getMapProvider(), options = providerTileOptions(noWrap = TRUE))
+    
   })
   
   # observe({ # select active states
@@ -1299,6 +1313,7 @@ server <- function(input, output, session) {
     
     basedOnWidth <- input$basedOn2_Select
     
+    if (input$mainNav == "Overview") {
     
     #
     if (length(lat_start) > 0 && !is.na(lat_start)) {
@@ -1327,7 +1342,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$slon,
         lat = ~mapData@data$slat,
-        weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+        weight = 7, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
                        "<br></b>",
@@ -1352,7 +1367,7 @@ server <- function(input, output, session) {
       addCircles(
         lng = ~mapData@data$elon,
         lat = ~mapData@data$elat,
-        weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+        weight = 10, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
         color = ~palColorTracks(mapData@data$dataToMap),
         popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                        "<br><strong>Time: </strong></b>", mapData@data$time,
@@ -1391,10 +1406,10 @@ server <- function(input, output, session) {
       
       mapData <- sp::merge(stateSelected, mapData, by = "STUSPS", duplicateGeoms = TRUE)
       
-      activeState <- subset(states, STUSPS == getState1() | STUSPS == getState2())
+      #activeState <- subset(states, STUSPS == getState1() | STUSPS == getState2())
       
       # active state outline and fill
-      proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
+      #proxy %>% addPolygons(data = activeState, weight = 6, opacity = 1, color = "black", fillOpacity = 0.3, fillColor = "black")
       
       palColorTracks <- colorBin("#56ffc1", 1)
       mapData@data$dataToMap <- rep(1, nrow(mapData@data))
@@ -1431,7 +1446,7 @@ server <- function(input, output, session) {
         addCircles(
           lng = ~mapData@data$slon,
           lat = ~mapData@data$slat,
-          weight = 12, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
+          weight = 7, fillOpacity = 0.0, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96, color = ~palColorTracks(mapData@data$dataToMap), dashArray = "17, 17",
           popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                          "<br><strong>Time: </strong></b>", mapData@data$time,
                          "<br></b>",
@@ -1456,7 +1471,7 @@ server <- function(input, output, session) {
         addCircles(
           lng = ~mapData@data$elon,
           lat = ~mapData@data$elat,
-          weight = 15, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
+          weight = 10, fillOpacity = 0.6, radius = mapTrackWidth(mappings, basedOnWidth, i, mapData, 3600, 20000, "radius"), opacity = .96,
           color = ~palColorTracks(mapData@data$dataToMap),
           popup = paste0("    <strong>Date: </strong>", mapData@data$mo, " - ", mapData@data$dy, " - ", mapData@data$yr,
                          "<br><strong>Time: </strong></b>", mapData@data$time,
@@ -1480,6 +1495,7 @@ server <- function(input, output, session) {
           )), group = "Tracks")
       
       
+    }
     }
     
   })
@@ -1925,7 +1941,7 @@ server <- function(input, output, session) {
       
       c7$Hour <- ordered(c7$Hour, levels = hours12[,])
     }
-    
+     
     c7$Percent <- format(round(c7$Percent, 2), nsmall = 2)
     c7$Percent <- paste0(c7$Percent, "%")
     

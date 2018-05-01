@@ -21,6 +21,13 @@ choices_states <-
     "(VA)	Virginia", "(WA)	Washington", "(WV)	West Virginia", "(WI)	Wisconsin",
     "(WY)	Wyoming")
 
+maptypes <- c("Stamen.TonerLite",
+              "Stamen.TerrainBackground",
+              "Esri.WorldImagery",
+              "OpenStreetMap",
+              "OpenTopoMap",
+              "OpenMapSurfer.Roads")
+
 # -----------------------------
 ui <- fluidPage(
   
@@ -86,7 +93,7 @@ ui <- fluidPage(
                        column(9,
                               wellPanel(
                                 fluidRow(column(12, offset = 0, align = 'justify',
-                                                tags$style(type = "text/css", "#overview_map {min-height:74vh !important;z-index:5 !important;}"),
+                                                tags$style(type = "text/css", "#overview_map {min-height:76vh !important;z-index:5 !important;}"),
                                                 leafletOutput("overview_map")
                                 )))
                               )
@@ -109,10 +116,10 @@ ui <- fluidPage(
                                                             tabPanel("Chart", 
                                                                      fluidRow(
                                                                        column(6,
-                                                                              tags$style(type = "text/css", "#c1_state1 {min-height:30vh !important;}"),
+                                                                              tags$style(type = "text/css", "#c1_state1 {min-height:25vh !important;}"),
                                                                               plotlyOutput("c1_state1")),
                                                                        column(6,
-                                                                              tags$style(type = "text/css", "#c1_state2 {min-height:30vh !important;}"),
+                                                                              tags$style(type = "text/css", "#c1_state2 {min-height:25vh !important;}"),
                                                                               plotlyOutput("c1_state2"))
                                                                        
                                                                      )
@@ -120,10 +127,10 @@ ui <- fluidPage(
                                                             tabPanel("Table", 
                                                                      fluidRow(
                                                                        column(6,
-                                                                              tags$style(type = "text/css", "#c1_state1_table {min-height:30vh !important;}"),
+                                                                              tags$style(type = "text/css", "#c1_state1_table {min-height:25vh !important;}"),
                                                                               DTOutput("c1_state1_table")),
                                                                        column(6,
-                                                                              tags$style(type = "text/css", "#c1_state2_table {min-height:30vh !important;}"),
+                                                                              tags$style(type = "text/css", "#c1_state2_table {min-height:25vh !important;}"),
                                                                               DTOutput("c1_state2_table"))
                                                                      )
                                                             )
@@ -189,20 +196,20 @@ ui <- fluidPage(
                                                                                        tabPanel("Chart", 
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c2_state1 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c2_state1 {min-height:25vh !important;}"),
                                                                                                          plotlyOutput("c2_state1")), #, height = "80vh"
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c2_state2 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c2_state2 {min-height:25vh !important;}"),
                                                                                                          plotlyOutput("c2_state2"))
                                                                                                 )
                                                                                        ),
                                                                                        tabPanel("Table", 
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c2_state1_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c2_state1_table {min-height:25vh !important;}"),
                                                                                                          DTOutput("c2_state1_table")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c2_state1_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c2_state1_table {min-height:25vh !important;}"),
                                                                                                          DTOutput("c2_state2_table"))
                                                                                                 )
                                                                                        )
@@ -217,20 +224,20 @@ ui <- fluidPage(
                                                                                        tabPanel("Chart", 
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c3_state1 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c3_state1 {min-height:25vh !important;}"),
                                                                                                          plotlyOutput("c3_state1")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c3_state2 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c3_state2 {min-height:25vh !important;}"),
                                                                                                          plotlyOutput("c3_state2"))
                                                                                                 )
                                                                                        ),
                                                                                        tabPanel("Table",
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c3_state1_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c3_state1_table {min-height:25vh !important;}"),
                                                                                                          DTOutput("c3_state1_table")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c3_state2_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c3_state2_table {min-height:25vh !important;}"),
                                                                                                          DTOutput("c3_state2_table"))
                                                                                                 )
                                                                                        )
@@ -244,20 +251,20 @@ ui <- fluidPage(
                                                                                        tabPanel("Chart", 
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c4_state1 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c4_state1 {min-height:21vh !important;}"),
                                                                                                          plotlyOutput("c4_state1")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c4_state2 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c4_state2 {min-height:21vh !important;}"),
                                                                                                          plotlyOutput("c4_state2"))
                                                                                                 )
                                                                                        ),
                                                                                        tabPanel("Table",
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c4_state1_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c4_state1_table {min-height:21vh !important;}"),
                                                                                                          DTOutput("c4_state1_table")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c4_state2_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c4_state2_table {min-height:21vh !important;}"),
                                                                                                          DTOutput("c4_state2_table"))
                                                                                                 )
                                                                                        )
@@ -274,20 +281,20 @@ ui <- fluidPage(
                                                                                        tabPanel("Chart", 
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c8_state1 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c8_state1 {min-height:25vh !important;}"),
                                                                                                          plotlyOutput("c8_state1")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c8_state2 {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c8_state2 {min-height:25vh !important;}"),
                                                                                                          plotlyOutput("c8_state2"))
                                                                                                 )
                                                                                        ),
                                                                                        tabPanel("Table",
                                                                                                 fluidRow(
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c8_state1_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c8_state1_table {min-height:25vh !important;}"),
                                                                                                          DTOutput("c8_state1_table")),
                                                                                                   column(6,
-                                                                                                         tags$style(type = "text/css", "#c8_state2_table {min-height:30vh !important;}"),
+                                                                                                         tags$style(type = "text/css", "#c8_state2_table {min-height:25vh !important;}"),
                                                                                                          DTOutput("c8_state2_table"))
                                                                                                 )
                                                                                        )
@@ -379,11 +386,11 @@ ui <- fluidPage(
   # C9
                               wellPanel(
                               fluidRow(column(6, offset = 0, align = 'justify',
-                                              tags$style(type = "text/css", "#c9_state1_map {min-height:74vh !important;z-index:5 !important;}"),
+                                              tags$style(type = "text/css", "#c9_state1_map {min-height:79vh !important;z-index:5 !important;}"),
                                               leafletOutput("c9_state1_map")
                                        ),
                                        column(6, offset = 0, align = 'justify',
-                                              tags$style(type = "text/css", "#c9_state2_map {min-height:74vh !important;z-index:5 !important;}"),
+                                              tags$style(type = "text/css", "#c9_state2_map {min-height:79vh !important;z-index:5 !important;}"),
                                               leafletOutput("c9_state2_map")
                                        )
                               ))
@@ -399,7 +406,7 @@ ui <- fluidPage(
   fluidRow(
     column(1, offset = 10, align = 'right', h2("Map Provider: ")),
     column(1, offset = 0, align = 'justify',
-                  selectInput("mapProvider_Input", label = NULL, providers, width = "100%")
+                  selectInput("mapProvider_Input", label = NULL, maptypes, width = "100%")
   )
   )
   ),
@@ -542,13 +549,13 @@ ui <- fluidPage(
   # -----------------------------
   # log
   
-  column(1, offset = 11, align = 'right',
-         dropdownButton(
-           verbatimTextOutput("logText"),
-           circle = TRUE, label = "Log", status = "default", icon = icon("list", "fa-1x"), width = "1000px",
-           tooltip = FALSE
-         )
-  ),
+  # column(1, offset = 11, align = 'right',
+  #        dropdownButton(
+  #          verbatimTextOutput("logText"),
+  #          circle = TRUE, label = "Log", status = "default", icon = icon("list", "fa-1x"), width = "1000px",
+  #          tooltip = FALSE
+  #        )
+  # ),
   
   
   # -----------------------------
